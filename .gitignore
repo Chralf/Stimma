@@ -1,5 +1,6 @@
 # Ignorera upload-katalogen
-/upload/
+/upload/*
+
 # Men inkludera index.php i upload-katalogen
 !/upload/index.php
 
