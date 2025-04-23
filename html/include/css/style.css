@@ -1,0 +1,351 @@
+/* Primary Colors */
+:root {
+    --stimma-blue: #0F3B5F;
+    --accent-blue: #3A7CA5;
+    --knowledge-orange: #F39237;
+    --growth-green: #4CAF50;
+    --dark-gray: #333333;
+    --medium-gray: #767676;
+    --light-gray: #F5F7FA;
+    --white: #FFFFFF;
+    --success: #43A047;
+    --error: #E53935;
+    --warning: #FFB300;
+    --info: #2196F3;
+}
+
+/* Base styles */
+body {
+    background-color: var(--light-gray);
+    color: var(--dark-gray);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+}
+
+/* Navigation */
+.navbar {
+    background-color: var(--stimma-blue);
+    color: var(--white);
+}
+
+.navbar-brand {
+    color: var(--white);
+}
+
+.nav-link {
+    color: var(--white);
+}
+
+.nav-link:hover {
+    color: var(--accent-blue);
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--stimma-blue);
+    border-color: var(--stimma-blue);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background-color: #0c2e4a;
+    border-color: #0c2e4a;
+}
+
+.btn-secondary {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: var(--white);
+}
+
+.btn-secondary:hover {
+    background-color: #2d6a8f;
+    border-color: #2d6a8f;
+}
+
+/* Cards and containers */
+.card {
+    background-color: var(--white);
+    border: 1px solid var(--light-gray);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    color: var(--dark-gray);
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.card-header i {
+    color: var(--dark-gray);
+}
+
+/* Progress indicators */
+.progress {
+    background-color: var(--light-gray);
+}
+
+.progress-bar {
+    background-color: var(--growth-green);
+}
+
+/* Alerts and messages */
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+}
+
+.alert-success {
+    background-color: var(--success);
+    color: var(--white);
+}
+
+.alert-danger {
+    background-color: var(--error);
+    color: var(--white);
+}
+
+.alert-warning {
+    background-color: var(--warning);
+    color: var(--dark-gray);
+}
+
+.alert-info {
+    background-color: var(--info);
+    color: var(--white);
+}
+
+/* AI Chat */
+.ai-chat-container {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.ai-chat-header {
+    background-color: var(--stimma-blue);
+    color: var(--white);
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem 0.5rem 0 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ai-chat-body {
+    background-color: var(--white);
+    border: 1px solid var(--light-gray);
+    border-radius: 0 0 0.5rem 0.5rem;
+    padding: 1rem;
+}
+
+/* Message Styling */
+.ai-messages {
+    margin-bottom: 1rem;
+}
+
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+}
+
+/* Remove extra spacing from Markdown-generated content */
+.alert p {
+    margin: 0;
+}
+
+.alert p + p {
+    margin-top: 0.75rem;
+}
+
+/* List Styling in Messages */
+.alert ol,
+.alert ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.alert li {
+    margin: 0;
+    line-height: 1.4;
+}
+
+.alert li + li {
+    margin-top: 0.25rem;
+}
+
+/* Numbered list specific styling */
+.alert ol {
+    counter-reset: item;
+}
+
+.alert ol > li {
+    display: block;
+}
+
+.alert ol > li:before {
+    content: counters(item, ".") ". ";
+    counter-increment: item;
+}
+
+/* Ensure no extra space after last element */
+.alert > *:last-child {
+    margin-bottom: 0;
+}
+
+.alert > ol:last-child,
+.alert > ul:last-child {
+    margin-bottom: 0;
+}
+
+/* Specific Alert Types */
+.alert-info {
+    background-color: var(--info);
+    color: var(--white);
+}
+
+.alert-primary {
+    background-color: var(--accent-blue);
+    color: var(--white);
+}
+
+.alert-success {
+    background-color: var(--success);
+    color: var(--white);
+}
+
+.alert-warning {
+    background-color: var(--warning);
+    color: var(--dark-gray);
+}
+
+.alert-danger {
+    background-color: var(--error);
+    color: var(--white);
+}
+
+/* Message Input */
+.ai-input-container {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.ai-input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--light-gray);
+    border-radius: 0.25rem;
+    font-size: 1rem;
+}
+
+.ai-input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 0.2rem rgba(58, 124, 165, 0.25);
+}
+
+.ai-send-btn {
+    background-color: var(--stimma-blue);
+    color: var(--white);
+    border: none;
+    border-radius: 0.25rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.ai-send-btn:hover {
+    background-color: #0c2e4a;
+}
+
+/* Loading Indicator */
+.ai-typing {
+    display: flex;
+    gap: 0.3rem;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.ai-typing-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--medium-gray);
+    border-radius: 50%;
+    animation: typing 1s infinite;
+}
+
+.ai-typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.ai-typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+/* Quiz component */
+.quiz-navigation {
+    background-color: var(--knowledge-orange);
+    color: var(--white);
+}
+
+.correct-answer {
+    background-color: var(--success);
+    color: var(--white);
+}
+
+.incorrect-answer {
+    background-color: var(--error);
+    color: var(--white);
+}
+
+.quiz-warning {
+    background-color: var(--warning);
+    color: var(--dark-gray);
+}
+
+/* Text colors */
+.text-primary {
+    color: var(--stimma-blue);
+}
+
+.text-secondary {
+    color: var(--medium-gray);
+}
+
+/* Form elements */
+.form-control {
+    border-color: var(--medium-gray);
+}
+
+.form-control:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 0.2rem rgba(58, 124, 165, 0.25);
+}
+
+/* Accessibility */
+:focus {
+    outline: 3px solid var(--accent-blue);
+    outline-offset: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}

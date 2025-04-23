@@ -1,0 +1,61 @@
+# Känsliga konfigurationsfiler
+.env
+
+# Uppladdade filer
+/upload/
+
+# Cacheade filer
+*.log
+*.cache
+.sass-cache/
+*.sqlite
+.phpunit.result.cache
+
+# Databaser
+*.sql
+*.sqlite
+*.sqlite3
+*.db
+
+# Pakethanterare
+/vendor/
+/node_modules/
+npm-debug.log
+yarn-error.log
+composer.phar
+
+# IDE och editorspecifika filer
+/.idea/
+/.vscode/
+*.sublime-project
+*.sublime-workspace
+/.phpintel/
+.project
+.buildpath
+.settings/
+
+# OS-genererade filer
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporära filer
+*.swp
+*.swo
+*~
+
+# Kompilerade filer
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Backup-filer
+*.bak
+*.backup
