@@ -320,3 +320,6 @@ function logActivity($email, $message, $context = []) {
         return false;
     }
 }
+
+// Sökväg till upload-mappen
+$uploadDir = __DIR__ . '/../upload/';

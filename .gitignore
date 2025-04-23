@@ -1,8 +1,8 @@
-# Ignorera upload-katalogen
-/upload/*
+# Ignorera allt i html/upload-katalogen
+/html/upload/*
 
-# Men inkludera index.php i upload-katalogen
-!/upload/index.php
+# Men inkludera index.php i html/upload-katalogen
+!/html/upload/index.php
 
 # Ignorera konfigurationsfiler för databaser
 *.sql
