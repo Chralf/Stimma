@@ -1,5 +1,7 @@
 # Ignorera upload-katalogen
 /upload/
+# Men inkludera index.php i upload-katalogen
+!/upload/index.php
 
 # Ignorera konfigurationsfiler för databaser
 *.sql
