@@ -6,7 +6,6 @@
 
 # Vanliga filer att ignorera i webbprojekt
 .env
-.env.*
 /vendor/
 /node_modules/
 .DS_Store
