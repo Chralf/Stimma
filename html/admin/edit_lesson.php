@@ -63,7 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($_FILES['image']['size'] > $maxSize) {
             $error = 'Bilden får inte vara större än 5MB.';
         } else {
-            $uploadDir = '/var/www/tropheus.se/html/upload/';
+            // Sökväg till upload-mappen
+            $uploadDir = __DIR__ . '/../upload/';
             $fileName = uniqid() . '_' . basename($_FILES['image']['name']);
             $targetPath = $uploadDir . $fileName;
             

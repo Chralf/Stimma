@@ -151,11 +151,6 @@ function sendOpenAIRequest($messages) {
             'Authorization: Bearer ' . $apiKey
         ];
         
-        if ($isOpenRoute) {
-            // Lägg till extra headers för openroute
-            $headers[] = 'HTTP-Referer: https://tropheus.se';
-            $headers[] = 'X-Title: Stimma';
-        }
         
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
@@ -323,3 +318,8 @@ function logActivity($email, $message, $context = []) {
 
 // Sökväg till upload-mappen
 $uploadDir = __DIR__ . '/../upload/';
+
+// Kontrollera om mappen finns, annars skapa den
+if (!file_exists($uploadDir)) {
+    mkdir($uploadDir, 0755, true);
+}
