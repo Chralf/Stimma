@@ -35,9 +35,12 @@ function loadEnv($path) {
 // Define base path
 define('BASE_PATH', dirname(__DIR__));
 
+// Definiera bas-URL för länkar och bilder - enkel lösning för undermappar
+$scriptDir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+define('BASE_PATH_URL', $scriptDir);
+
 // Load environment variables
 loadEnv(BASE_PATH . '/.env');
-
 
 // Database configuration
 define('DB_CONNECTION', getenv('DB_CONNECTION'));
@@ -46,8 +49,6 @@ define('DB_PORT', getenv('DB_PORT'));
 define('DB_DATABASE', getenv('DB_DATABASE'));
 define('DB_USERNAME', getenv('DB_USERNAME'));
 define('DB_PASSWORD', trim(getenv('DB_PASSWORD'), '"'));
-
-
 
 // Site configuration
 define('SITE_NAME', getenv('SITE_NAME'));

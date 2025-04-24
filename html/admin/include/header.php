@@ -27,7 +27,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Admin - <?= $page_title ?? 'Administration' ?></title>
-    <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#007bff">
+    <link rel="mask-icon" href="<?= BASE_PATH_URL ?>/images/safari-pinned-tab.svg" color="#007bff">
     <meta name="msapplication-TileColor" content="#007bff">
     <meta name="theme-color" content="#007bff">
     
@@ -49,14 +49,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
     
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/admin/include/css/style.css">
+    <link rel="stylesheet" href="<?= BASE_PATH_URL ?>/include/css/style.css">
 </head>
 <body>
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <div class="sidebar d-flex flex-column h-100">
         <div class="px-3 mb-4 text-center">
-            <h3 class="text-white"><img src="/images/logo.png" alt="Stimma" class="me-2 img-white" height="75"></h3>
+            <h3 class="text-white"><img src="../images/logo.png" alt="Stimma" class="me-2 img-white" height="75"></h3>
         </div>
         <div class="d-flex flex-column h-100">
             <ul class="nav flex-column">
@@ -94,7 +94,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     </div>
                 </li>
                 <li class="nav-item">
-                    <a href="/logout.php" class="nav-link text-white px-3 py-2 d-flex align-items-center mb-3">
+                    <a href="<?= BASE_PATH_URL ?>/logout.php" class="nav-link text-white px-3 py-2 d-flex align-items-center mb-3">
                         <i class="bi bi-box-arrow-right me-2"></i> Logga ut
                     </a>
                 </li>

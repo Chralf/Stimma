@@ -33,7 +33,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
     
     <!-- Custom CSS -->
-    <link href="/include/css/style.css" rel="stylesheet">
+    <link href="<?= BASE_PATH_URL ?>/include/css/style.css" rel="stylesheet">
     
 <head>
 <body>
@@ -46,8 +46,8 @@
             <div class="d-flex justify-content-between align-items-center w-100">
                 <!-- Logo med länk till startsidan -->
                 <h1 class="h3 mb-0">
-                    <a href="/">
-                        <img src="/images/logo.png" height="50px" alt="<?= SITE_NAME ?>">
+                    <a href="<?= BASE_PATH_URL ?>/">
+                        <img src="<?= BASE_PATH_URL ?>/images/logo.png" height="50px" alt="<?= SITE_NAME ?>">
                     </a>
                 </h1>
                 
@@ -67,7 +67,7 @@
                         $isAdmin = $user ? (bool)$user['is_admin'] : false;
                     }
                     if ($isAdmin): ?>
-                        <a href="/admin/index.php" class="btn btn-link p-1 me-2 d-inline-flex align-items-center justify-content-center d-none d-sm-inline-flex" title="Administrera">
+                        <a href="<?= BASE_PATH_URL ?>/admin/index.php" class="btn btn-link p-1 me-2 d-inline-flex align-items-center justify-content-center d-none d-sm-inline-flex" title="Administrera">
                             <i class="bi bi-gear"></i>
                         </a>
                     <?php endif; ?>

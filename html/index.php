@@ -90,7 +90,7 @@ if (!$isLoggedIn):
             <div class="col-12 col-md-5 col-lg-4">
                 <div class="card shadow-sm">
                     <div class="card-body text-center p-4">
-                        <h1 class="display-4 mb-3"><img src="/images/logo.png" height="50px" alt="<?= $systemName ?>"></h1>
+                        <h1 class="display-4 mb-3"><img src="<?= BASE_PATH_URL ?>/images/logo.png" height="50px" alt="<?= $systemName ?>"></h1>
                         <?php if ($systemDescription): ?>
                             <p class="lead text-muted mb-4"><?= $systemDescription ?></p>
                         <?php endif; ?>

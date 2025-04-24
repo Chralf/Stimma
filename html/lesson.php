@@ -355,7 +355,7 @@ $user = queryOne("SELECT is_admin FROM " . DB_DATABASE . ".users WHERE id = ?", 
 
 <!-- Ladda JS-bibliotek -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-<script src="/include/js/stimma-confetti.js"></script>
+<script src="<?= BASE_PATH_URL ?>/include/js/stimma-confetti.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css" rel="stylesheet">

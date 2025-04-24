@@ -34,7 +34,7 @@ function sendLoginToken($email) {
              [$token, $email]);
     
     // Skapa inloggningslänk med fullständig URL och e-post
-    $loginUrl = 'https://' . $_SERVER['HTTP_HOST'] . '/verify.php?token=' . $token . '&email=' . urlencode($email);
+    $loginUrl = 'https://' . $_SERVER['HTTP_HOST'] . BASE_PATH_URL . '/verify.php?token=' . $token . '&email=' . urlencode($email);
     
     // Hämta systemnamn från .env
     $systemName = trim(getenv('SYSTEM_NAME'), '"\'') ?: 'AI-kurser';
