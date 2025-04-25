@@ -158,7 +158,7 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
     fclose($socket);
     
     // Logga felsökningsinformation
-    error_log("SMTP Debug: " . implode(" | ", $debug));
+    //error_log("SMTP Debug: " . implode(" | ", $debug));
     
     return true;
 }

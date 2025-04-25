@@ -1,7 +1,7 @@
 /* Primary Colors */
 :root {
     --stimma-blue: #0F3B5F;
-    --accent-blue: #3A7CA5;
+    --accent-blue: #0F3B5F;
     --knowledge-orange: #F39237;
     --growth-green: #4CAF50;
     --dark-gray: #333333;
@@ -348,4 +348,9 @@ body {
         width: 100%;
         margin-bottom: 0.5rem;
     }
+}
+
+.footer {
+    background-color: var(--light-gray);
+    line-height: 1.6;
 }

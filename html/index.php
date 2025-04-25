@@ -1,6 +1,6 @@
 <?php
 /**
- * Stimma - Lär dig i små steg
+ * Stimma - Learn in small steps
  * Copyright (C) 2025 Christian Alfredsson
  * 
  * This program is free software; licensed under GPL v2.
@@ -8,34 +8,46 @@
  * 
  * The name "Stimma" is a trademark and subject to restrictions.
  */
-?>
 
-<?php
+/**
+ * Main index page
+ * 
+ * This file handles:
+ * - User authentication and login
+ * - New user registration
+ * - Course and lesson progress tracking
+ * - Display of next available lesson
+ * - Progress statistics
+ */
+
+// Include required configuration and function files
 require_once __DIR__ . '/include/config.php';
 require_once __DIR__ . '/include/database.php';
 require_once __DIR__ . '/include/functions.php';
 require_once __DIR__ . '/include/auth.php';
 
+// Get system configuration from environment variables with fallbacks
 $systemName = trim(getenv('SYSTEM_NAME'), '"\'') ?: 'Stimma';
 $systemDescription = trim(getenv('SYSTEM_DESCRIPTION'), '"\'') ?: '';
 
+// Initialize error and success message variables
 $error = '';
 $success = '';
 
-// Handle form submission
+// Handle form submission for login/registration
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Validera CSRF-token
+    // Validate CSRF token for security
     if (!isset($_POST['csrf_token']) || !validateCsrfToken($_POST['csrf_token'])) {
         $error = 'Ogiltig förfrågan. Vänligen försök igen.';
     } else {
         $email = trim($_POST['email'] ?? '');
         
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            // Kontrollera om användaren redan finns
+            // Check if user already exists
             $user = queryOne("SELECT * FROM " . DB_DATABASE . ".users WHERE email = ?", [$email]);
             
             if ($user) {
-                // Användaren finns - skicka inloggningslänk
+                // Existing user - send login link
                 if (sendLoginToken($email)) {
                     $success = '<i class="bi bi-envelope-paper-fill me-2"></i>
                                <h4 class="mt-3">Inloggningslänk på väg!</h4>
@@ -46,17 +58,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error = 'Något gick fel vid utskick av inloggningslänk. Försök igen.';
                 }
             } else {
-                // Ny användare - kontrollera domänen
+                // New user - check domain
                 $domain = substr(strrchr($email, "@"), 1);
                 $allowedDomains = explode(',', getenv('MAIL_ALLOWED_RECIPIENTS'));
                 
                 if (in_array($domain, $allowedDomains)) {
-                    // Skapa användaren automatiskt med endast de kolumner som finns i tabellen
+                    // Create new user with only existing table columns
                     execute("INSERT INTO " . DB_DATABASE . ".users (email, created_at) 
                              VALUES (?, NOW())", 
                              [$email]);
                     
-                    // Skicka inloggningslänk
+                    // Send login link
                     if (sendLoginToken($email)) {
                         $success = '<i class="bi bi-envelope-paper-fill me-2"></i>
                                    <h4 class="mt-3">Konto skapat och inloggningslänk på väg!</h4>
@@ -76,30 +88,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Check if user is logged in
 $isLoggedIn = isLoggedIn();
 
-// Om inte inloggad – visa e-postformulär
+// If not logged in - show email form
 if (!$isLoggedIn): 
-    // Sätt sidtitel
+    // Set page title
     $page_title = $systemName . ' - Digitala verktyg för lärare';
-    // Inkludera header
+    // Include header
     require_once 'include/header.php';
 ?>
+    <!-- Login/Registration container -->
     <div class="container-sm min-vh-100 d-flex align-items-center px-3">
         <div class="row justify-content-center w-100">
             <div class="col-12 col-md-5 col-lg-4">
                 <div class="card shadow-sm">
                     <div class="card-body text-center p-4">
+                        <!-- Logo and system description -->
                         <h1 class="display-4 mb-3"><img src="<?= BASE_PATH_URL ?>/images/logo.png" height="50px" alt="<?= $systemName ?>"></h1>
                         <?php if ($systemDescription): ?>
                             <p class="lead text-muted mb-4"><?= $systemDescription ?></p>
                         <?php endif; ?>
                         
+                        <!-- Success message display -->
                         <?php if ($success): ?>
                             <div class="alert alert-success">
                                 <?= $success ?>
                             </div>
                         <?php else: ?>
+                            <!-- Error message display -->
                             <?php if ($error): ?>
                                 <div class="alert alert-danger">
                                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
@@ -107,6 +124,7 @@ if (!$isLoggedIn):
                                 </div>
                             <?php endif; ?>
                             
+                            <!-- Email input form -->
                             <form action="index.php" method="post" class="form">
                                 <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
                                 <div class="form-floating mb-3">
@@ -122,13 +140,13 @@ if (!$isLoggedIn):
         </div>
     </div>
 <?php 
-    // Inkludera footer
+    // Include footer
     require_once 'include/footer.php';
 else: 
-    // Hämta användarens ID
+    // Get user ID from session
     $userId = $_SESSION['user_id'];
     
-    // Hämta lektioner och kurser
+    // Fetch active lessons and courses
     $lessons = query("
         SELECT l.*, c.title as course_title, c.status as course_status
         FROM " . DB_DATABASE . ".lessons l
@@ -137,20 +155,20 @@ else:
         ORDER BY c.title, l.sort_order
     ");
     
-    // Hämta användarens framsteg
+    // Get user's progress
     $progress = query("SELECT * FROM " . DB_DATABASE . ".progress WHERE user_id = ?", [$userId]);
     
-    // Skapa en array med användarens framsteg för enkel åtkomst
+    // Create array for easy access to user progress
     $userProgress = [];
     foreach ($progress as $item) {
         $userProgress[$item['lesson_id']] = $item;
     }
     
-    // Hitta nästa lektion
+    // Find next available lesson
     $nextLesson = null;
     $nextCourse = null;
     
-    // Gruppera lektioner efter kurs och sortera efter kursordning
+    // Group lessons by course and sort by course order
     $courseGroups = [];
     foreach ($lessons as $lesson) {
         if (!isset($courseGroups[$lesson['course_id']])) {
@@ -163,12 +181,12 @@ else:
         $courseGroups[$lesson['course_id']]['lessons'][] = $lesson;
     }
 
-    // Sortera kurser efter sort_order
+    // Sort courses by sort_order
     uasort($courseGroups, function($a, $b) {
         return $a['sort_order'] <=> $b['sort_order'];
     });
 
-    // Hitta första icke-avklarade lektionen i den första icke-avklarade kursen
+    // Find first incomplete lesson in first incomplete course
     foreach ($courseGroups as $courseGroup) {
         $hasIncomplete = false;
         foreach ($courseGroup['lessons'] as $lesson) {
@@ -184,7 +202,7 @@ else:
         }
     }
     
-    // Gruppera lektioner efter kurs
+    // Group lessons by course for display
     $groupedLessons = [];
     foreach ($lessons as $lesson) {
         if (!isset($groupedLessons[$lesson['course_title']])) {
@@ -196,7 +214,7 @@ else:
         $groupedLessons[$lesson['course_title']]['lessons'][] = $lesson;
     }
     
-    // Räkna statistik
+    // Calculate progress statistics
     $lessonCount = 0;
     $completedCount = 0;
     foreach ($groupedLessons as $courseData) {
@@ -209,23 +227,27 @@ else:
     }
     $progressPercent = $lessonCount > 0 ? round(($completedCount / $lessonCount) * 100) : 0;
 
-    // Hämta användaruppgifter från databasen om inloggad
+    // Check if user is admin
     $isAdmin = false;
     if (isLoggedIn()) {
         $user = queryOne("SELECT is_admin FROM " . DB_DATABASE . ".users WHERE id = ?", [$_SESSION['user_id']]);
         $isAdmin = $user ? (bool)$user['is_admin'] : false;
     }
 
-    // Sätt sidtitel
+    // Set page title
     $page_title = $systemName . ' - Digitala verktyg för lärare';
-    // Inkludera header
+    // Include header
     require_once 'include/header.php';
 ?>
+    <!-- Main content container -->
     <div class="container-sm py-4">
         <div class="row">
+            <!-- Left sidebar (empty on desktop) -->
             <div class="col-lg-2 d-none d-lg-block"></div>
+            <!-- Main content area -->
             <div class="col-12 col-lg-8">
                 <main>
+                    <!-- Next lesson card -->
                     <?php if ($nextLesson): ?>
                     <div class="card mb-4">
                         <div class="card-body">

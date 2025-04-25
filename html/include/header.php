@@ -22,12 +22,13 @@
  * - SITE_NAME: Global site name constant
  * - BASE_PATH_URL: Base URL for the application
  */
-?>
 
+// Start of HTML document with Swedish language setting
+?>
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-    <!-- Basic meta tags -->
+    <!-- Basic meta tags for character encoding and responsive design -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= htmlspecialchars($page_title ?? SITE_NAME) ?></title>
@@ -42,15 +43,14 @@
     <!-- External JavaScript dependencies -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" defer></script>
     
-    <!-- Custom CSS -->
+    <!-- Custom CSS for site-specific styles -->
     <link href="<?= htmlspecialchars(BASE_PATH_URL) ?>/include/css/style.css" rel="stylesheet">
 </head>
 <body>
 
 <?php if (isLoggedIn()): ?>
-    <!-- Navigation bar for logged-in users -->
+    <!-- Navigation bar for logged-in users with responsive design -->
     <nav class="navbar navbar-expand-sm navbar-light bg-white shadow-sm" role="navigation" aria-label="Main navigation">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center w-100">
@@ -79,6 +79,7 @@
                         $isAdmin = $user ? (bool)$user['is_admin'] : false;
                     }
                     if ($isAdmin): ?>
+                        <!-- Admin panel link (hidden on small screens) -->
                         <a href="<?= htmlspecialchars(BASE_PATH_URL) ?>/admin/index.php" 
                            class="btn btn-link p-1 me-2 d-inline-flex align-items-center justify-content-center d-none d-sm-inline-flex" 
                            title="Administrera"
@@ -86,6 +87,7 @@
                             <i class="bi bi-gear" aria-hidden="true"></i>
                         </a>
                     <?php endif; ?>
+                    <!-- Logout button -->
                     <a href="logout.php" 
                        class="btn btn-link p-1 d-inline-flex align-items-center justify-content-center" 
                        title="Logga ut"

@@ -1,6 +1,6 @@
 <?php
 /**
- * Stimma - Lär dig i små steg
+ * Stimma - Learn in small steps
  * Copyright (C) 2025 Christian Alfredsson
  * 
  * This program is free software; licensed under GPL v2.
@@ -8,17 +8,29 @@
  * 
  * The name "Stimma" is a trademark and subject to restrictions.
  */
-?>
 
-<?php
+/**
+ * Lesson page handler
+ * 
+ * This file handles the display and interaction with individual lessons in the system.
+ * It includes:
+ * - Lesson content display
+ * - Quiz functionality
+ * - Progress tracking
+ * - Navigation between lessons
+ * - Admin controls
+ */
+
+// Include required configuration and function files
 require_once __DIR__ . '/include/config.php';
 require_once __DIR__ . '/include/database.php';
 require_once __DIR__ . '/include/functions.php';
 require_once __DIR__ . '/include/auth.php';
 
+// Get system name from environment variable with fallback
 $systemName = trim(getenv('SYSTEM_NAME'), '"\'') ?: 'AI-kurser';
 
-// Kontrollera om användaren är inloggad
+// Check if user is logged in, redirect if not
 if (!isLoggedIn()) {
     $_SESSION['flash_message'] = 'Du måste vara inloggad för att se denna sida.';
     $_SESSION['flash_type'] = 'warning';
@@ -26,19 +38,22 @@ if (!isLoggedIn()) {
     exit;
 }
 
-// Hjälpfunktion för att kontrollera om det är en AJAX-förfrågan
+/**
+ * Helper function to check if the current request is an AJAX request
+ * @return bool True if the request is AJAX, false otherwise
+ */
 function isAjaxRequest() {
     return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 }
 
-// Hämta lektions-ID från URL
+// Get lesson ID from URL parameter
 $lessonId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-// Hämta användarens ID
+// Get current user's ID from session
 $userId = $_SESSION['user_id'];
 
-// Hämta lektionsinformation
+// Fetch lesson information including course details
 $lesson = queryOne("
     SELECT l.*, c.title as course_title, c.status as course_status
     FROM " . DB_DATABASE . ".lessons l
@@ -46,7 +61,7 @@ $lesson = queryOne("
     WHERE l.id = ?
 ", [$lessonId]);
 
-// Om lektionen inte finns, omdirigera till startsidan
+// Redirect if lesson doesn't exist
 if (!$lesson) {
     $_SESSION['flash_message'] = 'Lektionen kunde inte hittas.';
     $_SESSION['flash_type'] = 'danger';
@@ -54,18 +69,18 @@ if (!$lesson) {
     exit;
 }
 
-// Hämta användarens framsteg för denna lektion
+// Get user's progress for this lesson
 $progress = queryOne("
     SELECT * FROM " . DB_DATABASE . ".progress 
     WHERE user_id = ? AND lesson_id = ?
 ", [$userId, $lessonId]);
 
-// Kontrollera om lektionen är avklarad
+// Check if lesson is completed
 $isCompleted = $progress && $progress['status'] === 'completed';
 
-// Hantera formulärsvar
+// Handle form submission for quiz answers
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['answer'])) {
-    // Validera CSRF-token
+    // Validate CSRF token for security
     if (!isset($_POST['csrf_token']) || !validateCsrfToken($_POST['csrf_token'])) {
         if (isAjaxRequest()) {
             header('Content-Type: application/json');
@@ -78,13 +93,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['answer'])) {
         exit;
     }
     
+    // Get and validate user's answer
     $userAnswer = (int)$_POST['answer'];
     $correctAnswer = (int)$lesson['quiz_correct_answer'];
     
-    // Kontrollera om svaret är korrekt
+    // Check if answer is correct
     $isCorrect = ($userAnswer === $correctAnswer);
     
-    // Kontrollera om alla tidigare lektioner är avklarade
+    // Check if all previous lessons in the course are completed
     $previousLessons = query("SELECT id FROM " . DB_DATABASE . ".lessons 
                             WHERE course_id = ? 
                             AND sort_order < (SELECT sort_order FROM " . DB_DATABASE . ".lessons WHERE id = ?)
@@ -102,17 +118,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['answer'])) {
         }
     }
     
-    // Uppdatera användarens framsteg endast om alla tidigare lektioner är avklarade
+    // Update user's progress if answer is correct and previous lessons are completed
     if ($isCorrect && $allPreviousCompleted) {
         if (!$progress) {
-            // Skapa ny framstegspost om den inte finns
+            // Create new progress record if it doesn't exist
             execute("
                 INSERT INTO " . DB_DATABASE . ".progress 
                 (user_id, lesson_id, status, score)
                 VALUES (?, ?, 'completed', 1)
             ", [$userId, $lessonId]);
         } else {
-            // Uppdatera befintlig framstegspost
+            // Update existing progress record
             execute("
                 UPDATE " . DB_DATABASE . ".progress 
                 SET status = 'completed', 
@@ -123,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['answer'])) {
         
         $isCompleted = true;
         
-        // Hämta nästa lektion
+        // Get next lesson in the course
         $nextLesson = queryOne("
             SELECT l.*, c.title as course_title
             FROM " . DB_DATABASE . ".lessons l
@@ -133,6 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['answer'])) {
             LIMIT 1
         ", [$lesson['course_id'], $lesson['sort_order']]);
         
+        // Handle AJAX response
         if (isAjaxRequest()) {
             header('Content-Type: application/json');
             echo json_encode([
@@ -149,6 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['answer'])) {
         redirect("lesson.php?id=$lessonId");
         exit;
     } else if (!$allPreviousCompleted) {
+        // Handle case where previous lessons aren't completed
         $message = 'Du måste klara alla tidigare lektioner innan du kan gå vidare.';
         if (isAjaxRequest()) {
             header('Content-Type: application/json');
@@ -158,6 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['answer'])) {
         $_SESSION['flash_message'] = $message;
         $_SESSION['flash_type'] = 'warning';
     } else if (!$isCorrect) {
+        // Handle incorrect answer
         $message = 'Fel svar. Försök igen!';
         if (isAjaxRequest()) {
             header('Content-Type: application/json');
@@ -169,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['answer'])) {
     }
 }
 
-// Förbered quiz-alternativ
+// Prepare quiz options from JSON data
 $quizOptions = [];
 if (!empty($lesson['quiz_options'])) {
     $quizOptions = json_decode($lesson['quiz_options'], true);
@@ -178,7 +197,7 @@ if (!empty($lesson['quiz_options'])) {
     }
 }
 
-// Hämta nästa lektion i samma kurs
+// Get next lesson in the course for navigation
 $nextLesson = queryOne("
     SELECT l.*, c.title as course_title
     FROM " . DB_DATABASE . ".lessons l
@@ -188,46 +207,29 @@ $nextLesson = queryOne("
     LIMIT 1
 ", [$lesson['course_id'], $lesson['sort_order']]);
 
+// Check if current user is an admin
 $user = queryOne("SELECT is_admin FROM " . DB_DATABASE . ".users WHERE id = ?", [$_SESSION['user_id']]);
-?>
-<!DOCTYPE html>
-<html lang="sv">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $systemName ?> - <?= $lesson['title'] ?></title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Bootstrap Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    
-    <!-- jQuery -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Custom CSS -->
-    <link href="include/css/style.css" rel="stylesheet">
-</head>
-<body>
 
+// Set page title with course name
+$page_title = $systemName . ' - ' . sanitize($lesson['course_title']) . ' - ' . sanitize($lesson['title']);
+
+// Include header template
+include 'include/header.php';
+?>
+
+<!-- Main content container -->
 <div class="container-sm py-4">
     <div class="row">
-        <div class="col-12">
-            <a href="index.php" class="text-decoration-none text-muted ml-3"><i class="bi bi-arrow-left"></i> <?= $lesson['course_title'] ?> </a>
-        </div>
-    </div>
-</div>
-
-<div class="container-sm">
-    <div class="row">
+        <!-- Left sidebar (empty on desktop) -->
         <div class="col-lg-2 d-none d-lg-block"></div>
+        
+        <!-- Main content area -->
         <div class="col-12 col-lg-8">
             <main>
+                <!-- Lesson content card -->
                 <div class="card mb-4">
                     <div class="card-body">
+                        <!-- Flash message display -->
                         <?php if (isset($_SESSION['flash_message']) && $_SESSION['flash_type'] !== 'danger'): ?>
                         <div class="alert alert-<?= $_SESSION['flash_type'] ?? 'info' ?>" role="alert">
                             <?= $_SESSION['flash_message'] ?>
@@ -236,18 +238,27 @@ $user = queryOne("SELECT is_admin FROM " . DB_DATABASE . ".users WHERE id = ?", 
                             unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                         endif; ?>
                         
+                        <!-- Completion status badge -->
                         <?php if ($isCompleted): ?>
                         <div class="text-end mb-3">
                             <span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i> Avklarad</span>
                         </div>
                         <?php endif; ?>
                         
-                        <h1 class="h2 mb-3"><?= sanitize($lesson['title']) ?></h1>
+                        <!-- Lesson title with admin edit link -->
+                        <h1 class="h2 mb-3"><?= sanitize($lesson['title']) ?>
+                    
+                        <?php if ($user && $user['is_admin']): ?>
+                            <a href="admin/edit_lesson.php?id=<?= $lesson['id'] ?>"> <i class="bi bi-pencil-square small"></i></a>
+                        <?php endif; ?>
+                        </h1>
                         
+                        <!-- Lesson description -->
                         <?php if (!empty($lesson['description'])): ?>
                             <div class="lead mb-4"><?= nl2br(sanitize($lesson['description'])) ?></div>
                         <?php endif; ?>
                         
+                        <!-- Lesson content with optional image -->
                         <div class="row">
                             <?php if (!empty($lesson['image_url'])): ?>
                             <div class="col-md-4">
@@ -266,7 +277,7 @@ $user = queryOne("SELECT is_admin FROM " . DB_DATABASE . ".users WHERE id = ?", 
                     </div>
                 </div>
                 
-                <!-- AI-chattruta -->
+                <!-- AI chat interface card -->
                 <div class="card mb-4">
                     <div class="card-header d-flex align-items-center" id="aiChatToggle">
                         <i class="bi bi-robot me-2"></i> Fråga AI om detta ämne
@@ -353,12 +364,7 @@ $user = queryOne("SELECT is_admin FROM " . DB_DATABASE . ".users WHERE id = ?", 
     </div>
 </div>
 
-<!-- Ladda JS-bibliotek -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-<script src="<?= BASE_PATH_URL ?>/include/js/stimma-confetti.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css" rel="stylesheet">
+
 
 <script>
 // Konfigurera marked om det finns tillgängligt
@@ -577,8 +583,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?php if ($user && $user['is_admin']): ?>
-<!-- Innehåll endast för administratörer kan läggas till här vid behov -->
-<?php endif; ?>
-</body>
-</html>
+
+
+<?php include 'include/footer.php'; ?>
