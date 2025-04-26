@@ -17,6 +17,11 @@
  * for configuration and is completely independent of other files.
  */
 
+// Ensure script is run from command line
+if (php_sapi_name() !== 'cli') {
+    die("This script can only be run from command line.\n");
+}
+
 // Load environment variables from .env file
 function loadEnv($path) {
     if (!file_exists($path)) {
