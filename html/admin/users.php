@@ -240,14 +240,6 @@ require_once 'include/header.php';
                         <label for="email" class="form-label">E-postadress</label>
                         <input type="email" class="form-control" id="email" name="email" required>
                     </div>
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="is_admin" name="is_admin">
-                            <label class="form-check-label" for="is_admin">
-                                Administratör
-                            </label>
-                        </div>
-                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Avbryt</button>
