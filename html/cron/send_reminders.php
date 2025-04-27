@@ -274,9 +274,9 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null, $
 // Send reminders
 foreach ($users as $user) {
     // Test filter - only send to christian@iteca.se
-    if ($user['email'] !== 'christian@iteca.se') {
-        continue;
-    }
+ //   if ($user['email'] !== 'christian@iteca.se') {
+  //      continue;
+  //  }
 
     // Get next lesson and completed count
     $nextLesson = getNextLesson($pdo, $user['id']);

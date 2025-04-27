@@ -248,7 +248,7 @@ include 'include/header.php';
                         <!-- Lesson title with admin edit link -->
                         <h1 class="h2 mb-3"><?= sanitize($lesson['title']) ?>
                     
-                        <?php if ($user && $user['is_admin']): ?>
+                        <?php if ($user['is_admin']): ?>
                             <a href="admin/edit_lesson.php?id=<?= $lesson['id'] ?>"> <i class="bi bi-pencil-square small"></i></a>
                         <?php endif; ?>
                         </h1>
