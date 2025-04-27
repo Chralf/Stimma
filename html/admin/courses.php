@@ -61,9 +61,14 @@ require_once 'include/header.php';
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex justify-content-between align-items-center">
         <h6 class="m-0 font-weight-bold text-muted">Kurser</h6>
-        <a href="edit_course.php" class="btn btn-sm btn-primary">
-            <i class="bi bi-plus-lg"></i> Ny kurs
-        </a>
+        <div class="d-flex gap-2">
+            <a href="import.php" class="btn btn-sm btn-secondary">
+                <i class="bi bi-upload"></i> Importera kurs
+            </a>
+            <a href="edit_course.php" class="btn btn-sm btn-primary">
+                <i class="bi bi-plus-lg"></i> Ny kurs
+            </a>
+        </div>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -106,6 +111,9 @@ require_once 'include/header.php';
                                 </a>
                                 <a href="edit_course.php?id=<?= $course['id'] ?>" class="btn btn-sm btn-outline-secondary">
                                     <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="export.php?id=<?= $course['id'] ?>" class="btn btn-sm btn-outline-secondary" title="Exportera kurs">
+                                    <i class="bi bi-box-arrow-up"></i>
                                 </a>
                                 <a href="courses.php?action=delete&id=<?= $course['id'] ?>" 
                                    onclick="return confirm('Är du säker på att du vill radera denna kurs? Om kursen innehåller lektioner måste dessa tas bort först.')"

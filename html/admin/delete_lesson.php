@@ -38,10 +38,21 @@ try {
     
     $_SESSION['message'] = 'Lektionen har raderats.';
     $_SESSION['message_type'] = 'success';
+
+    // Kontrollera om det finns fler lektioner kvar i kursen
+    $remainingLessons = queryOne("SELECT COUNT(*) as count FROM " . DB_DATABASE . ".lessons WHERE course_id = ?", [$lesson['course_id']]);
+    
+    if ($remainingLessons['count'] > 0) {
+        // Om det finns fler lektioner, stanna på lessons.php
+        header('Location: lessons.php?course_id=' . $lesson['course_id']);
+    } else {
+        // Om det inte finns fler lektioner, gå till courses.php
+        header('Location: courses.php');
+    }
+    exit;
 } catch (Exception $e) {
     $_SESSION['message'] = 'Ett fel uppstod: ' . $e->getMessage();
     $_SESSION['message_type'] = 'danger';
+    header('Location: lessons.php?course_id=' . $lesson['course_id']);
+    exit;
 }
-
-header('Location: lessons.php');
-exit;
