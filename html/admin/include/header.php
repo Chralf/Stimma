@@ -17,6 +17,11 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit;
 }
 
+// Generera CSRF-token om den inte redan finns
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 // Bestäm aktiv sida
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
@@ -50,6 +55,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<?= BASE_PATH_URL ?>/include/css/style.css">
+    
+    <!-- CSRF Token för AJAX-anrop -->
+    <script>
+        const CSRF_TOKEN = '<?= $_SESSION['csrf_token'] ?>';
+    </script>
 </head>
 <body>
     <!-- Bootstrap Bundle with Popper -->

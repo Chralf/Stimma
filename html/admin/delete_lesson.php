@@ -16,6 +16,14 @@ require_once '../include/database.php';
 require_once '../include/functions.php';
 require_once '../include/auth.php';
 
+// Kontrollera CSRF-token
+if (!isset($_GET['csrf_token']) || $_GET['csrf_token'] !== $_SESSION['csrf_token']) {
+    $_SESSION['message'] = 'Ogiltig CSRF-token.';
+    $_SESSION['message_type'] = 'danger';
+    header('Location: lessons.php');
+    exit;
+}
+
 // Kontrollera att ID finns
 if (!isset($_GET['id'])) {
     $_SESSION['message'] = 'Inget ID angivet.';

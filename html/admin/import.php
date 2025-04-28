@@ -185,6 +185,7 @@ require_once 'include/header.php';
     </div>
     <div class="card-body">
         <form method="POST" enctype="multipart/form-data" id="importForm">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
             <div class="mb-3">
                 <label for="course_file" class="form-label">Välj kursfil (JSON)</label>
                 <input type="file" class="form-control" id="course_file" name="course_file" accept=".json" required>

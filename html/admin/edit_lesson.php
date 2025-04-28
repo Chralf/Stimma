@@ -219,6 +219,7 @@ $courses = queryAll("SELECT * FROM " . DB_DATABASE . ".courses ORDER BY sort_ord
                     <?php endif; ?>
                     
                     <form method="post" action="" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
                         <div class="row">
                             <div class="col-md-8 mb-3">
                                 <div class="form-floating">
@@ -341,3 +342,44 @@ $courses = queryAll("SELECT * FROM " . DB_DATABASE . ".courses ORDER BY sort_ord
 <?php
 // Inkludera footer
 require_once 'include/footer.php';
+?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('image');
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Validera filtyp
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Endast JPG, PNG och GIF bilder är tillåtna.');
+                e.target.value = '';
+                return;
+            }
+
+            // Validera filstorlek (5MB)
+            const maxSize = 5 * 1024 * 1024;
+            if (file.size > maxSize) {
+                alert('Bilden får inte vara större än 5MB.');
+                e.target.value = '';
+                return;
+            }
+
+            // Validera bilddimensioner
+            const img = new Image();
+            img.onload = function() {
+                const maxWidth = 1920;
+                const maxHeight = 1080;
+                if (this.width > maxWidth || this.height > maxHeight) {
+                    alert('Bilden är för stor. Max dimensioner är ' + maxWidth + 'x' + maxHeight + ' pixlar.');
+                    e.target.value = '';
+                }
+            };
+            img.src = URL.createObjectURL(file);
+        });
+    }
+});
+</script>

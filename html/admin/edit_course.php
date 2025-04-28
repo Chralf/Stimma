@@ -90,6 +90,7 @@ require_once 'include/header.php';
                     <?php endif; ?>
                     
                     <form method="post" action="">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
                         <input type="hidden" name="id" value="<?= $course['id'] ?? '' ?>">
                         
                         <div class="form-floating mb-3">

@@ -115,7 +115,7 @@ require_once 'include/header.php';
                                 <a href="export.php?id=<?= $course['id'] ?>" class="btn btn-sm btn-outline-secondary" title="Exportera kurs">
                                     <i class="bi bi-box-arrow-up"></i>
                                 </a>
-                                <a href="courses.php?action=delete&id=<?= $course['id'] ?>" 
+                                <a href="delete_course.php?id=<?= $course['id'] ?>&csrf_token=<?= htmlspecialchars($_SESSION['csrf_token']) ?>" 
                                    onclick="return confirm('Är du säker på att du vill radera denna kurs? Om kursen innehåller lektioner måste dessa tas bort först.')"
                                    class="btn btn-sm btn-outline-danger">
                                     <i class="bi bi-trash"></i>
@@ -135,6 +135,8 @@ require_once 'include/header.php';
 <?php
 // Definiera extra JavaScript
 $extra_scripts = '<script>
+    const CSRF_TOKEN = \'' . htmlspecialchars($_SESSION['csrf_token']) . '\';
+    
     function deleteCourse(id) {
         if (confirm(\'Är du säker på att du vill ta bort denna kurs? Alla lektioner i kursen kommer också att tas bort.\')) {
             $.post(\'delete_course.php\', { id: id }, function(response) {
@@ -193,6 +195,9 @@ $extra_scripts = '<script>
                 $.ajax({
                     url: "update_course_order.php",
                     method: "POST",
+                    headers: {
+                        "X-CSRF-Token": CSRF_TOKEN
+                    },
                     data: { 
                         courses: JSON.stringify(courseIds)
                     },

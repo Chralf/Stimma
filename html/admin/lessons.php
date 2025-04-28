@@ -47,6 +47,8 @@ $lessons = query("SELECT * FROM " . DB_DATABASE . ".lessons WHERE course_id = ? 
 
 // Definiera extra JavaScript för drag-and-drop sortering
 $extra_scripts = '<script>
+    const CSRF_TOKEN = \'' . htmlspecialchars($_SESSION['csrf_token']) . '\';
+    
     $(document).ready(function() {
         $("#sortable-lessons").sortable({
             items: "tr",
@@ -74,6 +76,9 @@ $extra_scripts = '<script>
                 $.ajax({
                     url: "update_lesson_order.php",
                     method: "POST",
+                    headers: {
+                        "X-CSRF-Token": CSRF_TOKEN
+                    },
                     data: { 
                         lessons: JSON.stringify(lessonIds),
                         course_id: ' . $courseId . '
@@ -161,9 +166,9 @@ require_once 'include/header.php';
                                     <a href="edit_lesson.php?id=<?= $lesson['id'] ?>" class="btn btn-sm btn-primary">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <a href="delete_lesson.php?id=<?= $lesson['id'] ?>&course_id=<?= $courseId ?>" 
-                                       class="btn btn-sm btn-danger"
-                                       onclick="return confirm('Är du säker på att du vill ta bort denna lektion?')">
+                                    <a href="delete_lesson.php?id=<?= $lesson['id'] ?>&csrf_token=<?= htmlspecialchars($_SESSION['csrf_token']) ?>" 
+                                       onclick="return confirm('Är du säker på att du vill radera denna lektion?')"
+                                       class="btn btn-sm btn-outline-danger">
                                         <i class="bi bi-trash"></i>
                                     </a>
                                 </td>

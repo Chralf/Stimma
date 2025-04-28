@@ -24,6 +24,14 @@ if (!isLoggedIn()) {
     exit;
 }
 
+// Kontrollera CSRF-token
+if (!isset($_GET['csrf_token']) || $_GET['csrf_token'] !== $_SESSION['csrf_token']) {
+    $_SESSION['message'] = 'Ogiltig CSRF-token.';
+    $_SESSION['message_type'] = 'danger';
+    header('Location: courses.php');
+    exit;
+}
+
 // Kontrollera om ID finns
 if (!isset($_GET['id'])) {
     $_SESSION['message'] = 'Ingen kurs specificerad.';

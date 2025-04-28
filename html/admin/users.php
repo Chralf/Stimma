@@ -179,6 +179,7 @@ require_once 'include/header.php';
                                             </td>
                                             <td>
                                                 <form method="post" class="d-inline" onsubmit="return confirm('Är du säker på att du vill ändra admin-status för denna användare?');">
+                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
                                                     <input type="hidden" name="action" value="toggle_admin">
                                                     <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
                                                     <input type="hidden" name="is_admin" value="<?= $user['is_admin'] ? '0' : '1' ?>">
@@ -234,6 +235,7 @@ require_once 'include/header.php';
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Stäng"></button>
             </div>
             <form method="post" action="">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
                 <div class="modal-body">
                     <input type="hidden" name="action" value="create_user">
                     <div class="mb-3">
