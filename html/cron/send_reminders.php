@@ -83,16 +83,25 @@ try {
 }
 
 // Get users who haven't completed their daily tasks
-$sql = "SELECT u.id, u.email, u.name 
+$sql = "SELECT DISTINCT u.id, u.email, u.name 
         FROM users u 
         WHERE u.email IS NOT NULL 
         AND u.email != '' 
-        AND NOT EXISTS (
+        AND EXISTS (
             SELECT 1 
-            FROM progress p 
-            WHERE p.user_id = u.id 
-            AND p.status = 'completed'
-            AND DATE(p.updated_at) = CURDATE()
+            FROM progress p
+            JOIN lessons l ON p.lesson_id = l.id
+            JOIN courses c ON l.course_id = c.id
+            WHERE p.user_id = u.id
+            AND c.status = 'active'
+        )
+        AND EXISTS (
+            SELECT 1 
+            FROM lessons l
+            JOIN courses c ON l.course_id = c.id
+            LEFT JOIN progress p ON l.id = p.lesson_id AND p.user_id = u.id
+            WHERE c.status = 'active'
+            AND (p.status IS NULL OR p.status != 'completed')
         )";
 
 try {
