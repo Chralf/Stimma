@@ -323,3 +323,110 @@ $uploadDir = __DIR__ . '/../upload/';
 if (!file_exists($uploadDir)) {
     mkdir($uploadDir, 0755, true);
 }
+
+/**
+ * Rensa HTML-innehåll och behåll endast grundläggande formatering
+ * @param string $html HTML-innehållet som ska rensas
+ * @return string Rensat HTML-innehåll
+ */
+function cleanHtml($html) {
+    if (empty($html)) {
+        return '';
+    }
+
+    // Ta bort escaped quotes
+    $html = str_replace('\"', '"', $html);
+    
+    // Konvertera HTML-entiteter till deras motsvarande tecken
+    $html = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    
+    // Lista över tillåtna HTML-taggar
+    $allowedTags = [
+        'br',      // Radbrytning
+        'strong',  // Fet stil
+        'b',       // Fet stil (alternativ)
+        'em',      // Kursiv stil
+        'i',       // Kursiv stil (alternativ)
+        'u',       // Understruken
+        'ul',      // Punktlista
+        'ol',      // Numrerad lista
+        'li',      // Listobjekt
+        'p'        // Stycke
+    ];
+    
+    // Ta bort alla HTML-taggar förutom de tillåtna
+    $html = strip_tags($html, '<' . implode('><', $allowedTags) . '>');
+    
+    // Ta bort alla attribut från de kvarvarande taggarna
+    $html = preg_replace('/<([\w]+)[^>]*>/i', '<$1>', $html);
+    
+    // Ta bort tomma attribut
+    $html = preg_replace('/<([\w]+)\s+>/i', '<$1>', $html);
+    
+    // Ta bort kapslade p-taggar
+    $html = preg_replace('/<p>\s*<p>/i', '<p>', $html);
+    $html = preg_replace('/<\/p>\s*<\/p>/i', '</p>', $html);
+    
+    // Ta bort p-taggar runt listobjekt
+    $html = preg_replace('/<p>\s*<li>/i', '<li>', $html);
+    $html = preg_replace('/<\/li>\s*<\/p>/i', '</li>', $html);
+    
+    // Konvertera dubbla radbrytningar till </p><p>
+    $html = '<p>' . preg_replace('/\n\n+/', '</p><p>', $html) . '</p>';
+    
+    // Konvertera enstaka radbrytningar till <br>
+    $html = str_replace("\n", '<br>', $html);
+    
+    // Ta bort tomma stycken
+    $html = preg_replace('/<p>\s*<\/p>/', '', $html);
+    
+    // Ta bort tomma listobjekt
+    $html = preg_replace('/<li>\s*<\/li>/', '', $html);
+    
+    // Säkerställ att alla taggar är korrekt stängda
+    $html = force_balance_tags($html);
+    
+    // Ta bort extra mellanslag
+    $html = preg_replace('/\s+/', ' ', $html);
+    
+    // Ta bort mellanslag mellan taggar
+    $html = preg_replace('/>\s+</', '><', $html);
+    
+    return trim($html);
+}
+
+/**
+ * Hjälpfunktion för att säkerställa att HTML-taggar är korrekt stängda
+ * @param string $html HTML-innehåll
+ * @return string Balanserad HTML
+ */
+function force_balance_tags($html) {
+    $html = preg_replace('#<([a-z][a-z0-9]*)\b[^>]*\/>#i', '<$1>', $html); // Ta bort själv-stängande slash
+    
+    // Matcha öppnande taggar
+    preg_match_all('#<(?!meta|img|br|hr|input\b)\b([a-z][a-z0-9]*)(?: .*)?(?<![/|/ ])>#iU', $html, $result);
+    $openedtags = $result[1];
+    
+    // Matcha stängande taggar
+    preg_match_all('#</([a-z][a-z0-9]*)>#iU', $html, $result);
+    $closedtags = $result[1];
+    
+    $len_opened = count($openedtags);
+    
+    if (count($closedtags) == $len_opened) {
+        return $html;
+    }
+    
+    $openedtags = array_reverse($openedtags);
+    
+    // Stäng alla öppna taggar
+    for ($i = 0; $i < $len_opened; $i++) {
+        if (!in_array($openedtags[$i], $closedtags)) {
+            $html .= '</' . $openedtags[$i] . '>';
+        } else {
+            unset($closedtags[array_search($openedtags[$i], $closedtags)]);
+        }
+    }
+    
+    return $html;
+}

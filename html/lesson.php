@@ -270,7 +270,7 @@ include 'include/header.php';
                             
                             <div class="<?= !empty($lesson['image_url']) ? 'col-md-8' : 'col-12' ?>">
                                 <div class="content">
-                                    <?= $lesson['content'] ?>
+                                    <?= cleanHtml($lesson['content']) ?>
                                 </div>
                             </div>
                         </div>
@@ -287,7 +287,7 @@ include 'include/header.php';
                             <div class="alert alert-info">
                                 <div>
                                     <?php if (!empty($lesson['ai_instruction'])): ?>
-                                        <?= $lesson['ai_instruction'] ?>
+                                        <?= cleanHtml($lesson['ai_instruction']) ?>
                                     <?php else: ?>
                                         Hej! Jag är din AI-assistent. Ställ gärna frågor om "<?= sanitize($lesson['title']) ?>" så hjälper jag dig.
                                     <?php endif; ?>
@@ -322,7 +322,7 @@ include 'include/header.php';
                                     unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                                 endif; ?>
                                 <div class="quiz-question mb-3">
-                                    <?= $lesson['quiz_question'] ?>
+                                    <?= cleanHtml($lesson['quiz_question']) ?>
                                 </div>
                                 <form method="post" class="quiz-form" id="quizForm">
                                     <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
@@ -339,7 +339,7 @@ include 'include/header.php';
                                         <div class="form-check mb-2">
                                             <input class="form-check-input" type="radio" name="answer" id="answer<?= $key ?>" value="<?= $key ?>" required>
                                             <label class="form-check-label" for="answer<?= $key ?>">
-                                                <?= $answer ?>
+                                                <?= cleanHtml($answer) ?>
                                             </label>
                                         </div>
                                         <?php
@@ -455,7 +455,7 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify({
                 lesson_id: <?= $lessonId ?>,
                 message: message,
-                ai_prompt: '<?= addslashes($lesson['ai_prompt'] ?? '') ?>'
+                ai_prompt: '<?= addslashes(cleanHtml($lesson['ai_prompt'] ?? '')) ?>'
             })
         })
         .then(response => response.json())

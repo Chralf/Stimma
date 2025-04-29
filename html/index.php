@@ -269,62 +269,154 @@ else:
                     </div>
                     <?php endif; ?>
                     
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2 class="h4 mb-0">Dina kurser</h2>
-                        <span class="badge bg-text text-dark"><?= count($groupedLessons) ?> kurser</span>
-                    </div>
-                    <?php if (empty($groupedLessons)): ?>
-                        <div class="alert alert-info">
-                            Det finns inga lektioner tillgängliga ännu.
-                        </div>
-                    <?php else: ?>
-                        <?php foreach ($groupedLessons as $courseTitle => $courseData): 
-                            $courseLessons = $courseData['lessons'];
-                            // Räkna framsteg för denna kurs
-                            $courseTotal = count($courseLessons);
-                            $courseCompleted = 0;
-                            foreach ($courseLessons as $lesson) {
-                                if (isset($userProgress[$lesson['id']]) && $userProgress[$lesson['id']]['status'] === 'completed') {
-                                    $courseCompleted++;
+                    <div class="mb-5">
+                        <h1 class="h3 mb-4">Mina kurser</h1>
+                        
+                        <div class="row row-cols-1 row-cols-md-2 g-4">
+                            <?php 
+                            $hasStartedCourses = false;
+                            foreach ($groupedLessons as $courseTitle => $courseData): 
+                                $courseLessons = $courseData['lessons'];
+                                // Calculate course progress
+                                $courseTotal = count($courseLessons);
+                                $courseCompleted = 0;
+                                $courseStarted = false;
+                                
+                                foreach ($courseLessons as $lesson) {
+                                    if (isset($userProgress[$lesson['id']]) && $userProgress[$lesson['id']]['status'] === 'completed') {
+                                        $courseCompleted++;
+                                        $courseStarted = true;
+                                    }
                                 }
-                            }
-                            $coursePercent = round(($courseCompleted / $courseTotal) * 100);
-                        ?>
-                        <div class="card mb-4">
-                            <div class="card-header bg-primary text-white">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h2 class="h5 mb-0"><?= sanitize($courseTitle) ?></h2>
-                                    <span class="badge bg-light text-primary"><?= $courseCompleted ?>/<?= $courseTotal ?></span>
+                                
+                                if (!$courseStarted) {
+                                    continue; // Skip to next course if not started
+                                }
+                                $hasStartedCourses = true;
+                                
+                                // Get the next lesson in this course
+                                $nextLessonInCourse = null;
+                                foreach ($courseLessons as $lesson) {
+                                    if (!isset($userProgress[$lesson['id']]) || $userProgress[$lesson['id']]['status'] !== 'completed') {
+                                        $nextLessonInCourse = $lesson;
+                                        break;
+                                    }
+                                }
+                            ?>
+                            <div class="col">
+                                <div class="card h-100">
+                                    <?php 
+                                        // Get first lesson of the course to access course data
+                                        $firstLesson = reset($courseLessons);
+                                        $courseImageUrl = $firstLesson['image_url'] ?? null;
+                                    ?>
+                                    <?php if ($courseImageUrl): ?>
+                                        <img src="<?= sanitize($courseImageUrl) ?>" class="card-img-top" alt="<?= sanitize($courseTitle) ?>">
+                                    <?php else: ?>
+                                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 140px;">
+                                            <i class="bi bi-book text-muted" style="font-size: 3rem;"></i>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <div class="card-body">
+                                        <h5 class="card-title"><?= sanitize($courseTitle) ?></h5>
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="progress flex-grow-1" style="height: 8px;">
+                                                <div class="progress-bar bg-success" role="progressbar" 
+                                                     style="width: <?= ($courseCompleted / $courseTotal) * 100 ?>%"></div>
+                                            </div>
+                                            <span class="ms-2 text-muted small"><?= $courseCompleted ?> av <?= $courseTotal ?> lektioner klarade</span>
+                                        </div>
+                                        
+                                        <?php if ($nextLessonInCourse): ?>
+                                            <p class="card-text text-muted small mb-3">
+                                                Nästa: <?= sanitize($nextLessonInCourse['title']) ?>
+                                            </p>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                    <div class="card-footer bg-white border-top-0">
+                                        <?php if ($nextLessonInCourse): ?>
+                                            <a href="lesson.php?id=<?= $nextLessonInCourse['id'] ?>" class="btn btn-outline-success w-100">
+                                                Fortsätt lära
+                                            </a>
+                                        <?php else: ?>
+                                            <button class="btn btn-outline-success w-100" disabled>Kursen är klar!</button>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                             </div>
-                            
-                            <div class="list-group list-group-flush">
-                                <?php foreach ($courseLessons as $lesson): 
-                                    $isCompleted = isset($userProgress[$lesson['id']]) && $userProgress[$lesson['id']]['status'] === 'completed';
-                                ?>
-                                <a href="lesson.php?id=<?= $lesson['id'] ?>" class="list-group-item list-group-item-action py-3">
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-3">
-                                            <?php if ($isCompleted): ?>
-                                            <i class="bi bi-check-circle-fill text-success" style="font-size: 1.25rem;"></i>
-                                            <?php else: ?>
-                                            <i class="bi bi-circle text-muted" style="font-size: 1.25rem;"></i>
-                                            <?php endif; ?>
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-1"><?= sanitize($lesson['title']) ?></h6>
-                                            <?php if (!empty($lesson['description'])): ?>
-                                            <p class="text-muted small mb-0"><?= sanitize($lesson['description']) ?></p>
-                                            <?php endif; ?>
-                                        </div>
-                                        <i class="bi bi-chevron-right text-muted ms-2"></i>
-                                    </div>
-                                </a>
-                                <?php endforeach; ?>
-                            </div>
+                            <?php endforeach; ?>
                         </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+                        
+                        <?php if (!$hasStartedCourses): ?>
+                            <div class="alert alert-info">
+                                Du har inte påbörjat några kurser än.
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="mb-5">
+                        <h2 class="h3 mb-4">Kurser</h2>
+                        
+                        <div class="row row-cols-1 row-cols-md-2 g-4">
+                            <?php 
+                            $hasUnstartedCourses = false;
+                            foreach ($groupedLessons as $courseTitle => $courseData): 
+                                $courseLessons = $courseData['lessons'];
+                                // Check if course is started
+                                $courseStarted = false;
+                                foreach ($courseLessons as $lesson) {
+                                    if (isset($userProgress[$lesson['id']]) && $userProgress[$lesson['id']]['status'] === 'completed') {
+                                        $courseStarted = true;
+                                        break;
+                                    }
+                                }
+                                
+                                if ($courseStarted) {
+                                    continue; // Skip to next course if already started
+                                }
+                                $hasUnstartedCourses = true;
+                                
+                                // Get the first lesson in this course
+                                $firstLesson = reset($courseLessons);
+                            ?>
+                            <div class="col">
+                                <div class="card h-100">
+                                    <?php 
+                                        $courseImageUrl = $firstLesson['image_url'] ?? null;
+                                    ?>
+                                    <?php if ($courseImageUrl): ?>
+                                        <img src="<?= sanitize($courseImageUrl) ?>" class="card-img-top" alt="<?= sanitize($courseTitle) ?>">
+                                    <?php else: ?>
+                                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 140px;">
+                                            <i class="bi bi-book text-muted" style="font-size: 3rem;"></i>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <div class="card-body">
+                                        <h5 class="card-title"><?= sanitize($courseTitle) ?></h5>
+                                        <p class="card-text text-muted small mb-3">
+                                            <?= count($courseLessons) ?> lektioner
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="card-footer bg-white border-top-0">
+                                        <a href="lesson.php?id=<?= $firstLesson['id'] ?>" class="btn btn-outline-success w-100">
+                                            Börja kursen
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        
+                        <?php if (!$hasUnstartedCourses): ?>
+                            <div class="alert alert-info">
+                                Det finns inga fler kurser tillgängliga just nu.
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </main>
             </div>
             <div class="col-lg-2 d-none d-lg-block"></div>
