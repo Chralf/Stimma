@@ -50,4 +50,42 @@ if (isLoggedIn()) {
     header('Location: ../index.php');
     exit;
 }
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = $_POST['email'] ?? '';
+    $password = $_POST['password'] ?? '';
+    
+    if (empty($email) || empty($password)) {
+        $_SESSION['message'] = 'Vänligen fyll i både e-post och lösenord.';
+        $_SESSION['message_type'] = 'danger';
+    } else {
+        $user = queryOne("SELECT id, email, password, is_admin FROM " . DB_DATABASE . ".users WHERE email = ?", [$email]);
+        
+        if ($user && password_verify($password, $user['password'])) {
+            // Sätt alla nödvändiga session-variabler
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_email'] = $user['email'];
+            $_SESSION['is_admin'] = $user['is_admin'];
+            
+            // Kontrollera om användaren är kursredaktör
+            $editor = queryOne("SELECT COUNT(*) as count FROM " . DB_DATABASE . ".course_editors WHERE email = ?", [$email]);
+            $isCourseEditor = $editor && $editor['count'] > 0;
+            
+            // Sätt admin_logged_in om användaren är admin eller kursredaktör
+            if ($user['is_admin'] == 1 || $isCourseEditor) {
+                $_SESSION['admin_logged_in'] = true;
+            }
+            
+            // Logga inloggningen
+            logActivity($user['id'], 'login', 'User logged in');
+            
+            // Omdirigera till admin-sidan
+            header('Location: courses.php');
+            exit;
+        } else {
+            $_SESSION['message'] = 'Felaktig e-post eller lösenord.';
+            $_SESSION['message_type'] = 'danger';
+        }
+    }
+}
 ?>

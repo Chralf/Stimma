@@ -24,6 +24,9 @@ if (empty($_SESSION['csrf_token'])) {
 
 // Bestäm aktiv sida
 $current_page = basename($_SERVER['PHP_SELF']);
+
+// Kontrollera om användaren är admin
+$isAdmin = isAdmin($_SESSION['user_email']);
 ?>
 <!DOCTYPE html>
 <html lang="sv">
@@ -80,6 +83,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         <i class="bi bi-journal-text me-2"></i> Kurser
                     </a>
                 </li>
+                <?php if ($isAdmin): ?>
                 <li class="nav-item">
                     <a href="users.php" class="nav-link text-white px-3 py-2 d-flex align-items-center <?= $current_page === 'users.php' ? 'active' : '' ?>">
                         <i class="bi bi-people me-2"></i> Användare
@@ -90,6 +94,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         <i class="bi bi-clipboard-data me-2"></i> Loggar
                     </a>
                 </li>
+                <?php endif; ?>
             </ul>
             <ul class="nav flex-column mt-auto">
                 <li class="nav-item">

@@ -16,16 +16,47 @@ require_once '../include/database.php';
 require_once '../include/functions.php';
 require_once '../include/auth.php';
 
+// Kontrollera om användaren är inloggad
+if (!isLoggedIn()) {
+    $_SESSION['message'] = 'Du måste vara inloggad för att se denna sida.';
+    $_SESSION['message_type'] = 'warning';
+    header('Location: ../index.php');
+    exit;
+}
+
+// Hämta användarens behörigheter
+$userEmail = $_SESSION['user_email'];
+$isAdmin = isAdmin($userEmail);
+
 // Hämta kursdata om vi redigerar en befintlig kurs
 $course = null;
 if (isset($_GET['id'])) {
-    $course = queryOne("SELECT * FROM " . DB_DATABASE . ".courses WHERE id = ?", [$_GET['id']]);
+    $courseId = (int)$_GET['id'];
+    $course = queryOne("SELECT * FROM " . DB_DATABASE . ".courses WHERE id = ?", [$courseId]);
+    
     if (!$course) {
         $_SESSION['message'] = 'Kursen hittades inte.';
         $_SESSION['message_type'] = 'danger';
         header('Location: courses.php');
         exit;
     }
+    
+    // Kontrollera om användaren har behörighet att redigera kursen
+    if (!$isAdmin) {
+        $isEditor = queryOne("SELECT 1 FROM " . DB_DATABASE . ".course_editors WHERE course_id = ? AND email = ?", [$courseId, $userEmail]);
+        if (!$isEditor) {
+            $_SESSION['message'] = 'Du har inte behörighet att redigera denna kurs.';
+            $_SESSION['message_type'] = 'danger';
+            header('Location: courses.php');
+            exit;
+        }
+    }
+
+    // Hämta kursredaktörer
+    $editors = queryAll("SELECT ce.email, u.name 
+                        FROM " . DB_DATABASE . ".course_editors ce 
+                        JOIN " . DB_DATABASE . ".users u ON ce.email = u.email 
+                        WHERE ce.course_id = ?", [$courseId]);
 }
 
 // Hantera formulärskickning
@@ -172,6 +203,48 @@ require_once 'include/header.php';
     </div>
 </div>
 
+<?php if (isset($course['id'])): ?>
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-muted">Kursredaktörer</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="editorSearch" placeholder="Sök efter användare...">
+                        <button class="btn btn-primary" type="button" id="addEditorBtn" disabled>Lägg till redaktör</button>
+                    </div>
+                    <div id="userSearchResults" class="list-group mt-2" style="display: none;"></div>
+                </div>
+                <div id="editorsList">
+                    <?php
+                    $editors = queryAll("SELECT ce.email, u.name 
+                                       FROM " . DB_DATABASE . ".course_editors ce 
+                                       JOIN " . DB_DATABASE . ".users u ON ce.email COLLATE utf8mb4_swedish_ci = u.email COLLATE utf8mb4_swedish_ci 
+                                       WHERE ce.course_id = ?", [$course['id']]);
+                    
+                    // Debug information
+                    error_log("Course ID: " . $course['id']);
+                    error_log("Editors count: " . count($editors));
+                    foreach ($editors as $editor) {
+                        error_log("Editor: " . $editor['email'] . " - " . $editor['name']);
+                    }
+                    
+                    foreach ($editors as $editor):
+                    ?>
+                    <div class="d-flex justify-content-between align-items-center mb-2 editor-item" data-email="<?= htmlspecialchars($editor['email']) ?>">
+                        <span><?= htmlspecialchars($editor['name'] ?? $editor['email']) ?></span>
+                        <button class="btn btn-sm btn-danger remove-editor" type="button">Ta bort</button>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const imageInput = document.getElementById('image');
@@ -209,8 +282,144 @@ document.addEventListener('DOMContentLoaded', function() {
             img.src = URL.createObjectURL(file);
         });
     }
+
+    // Hantera kursredaktörer
+    const addEditorBtn = document.getElementById('addEditorBtn');
+    const editorSearch = document.getElementById('editorSearch');
+    const userSearchResults = document.getElementById('userSearchResults');
+    const editorsList = document.getElementById('editorsList');
+    const courseId = <?= $course['id'] ?? 'null' ?>;
+    let selectedUser = null;
+
+    if (addEditorBtn && courseId) {
+        // Sök efter användare när användaren skriver
+        editorSearch.addEventListener('input', function() {
+            const search = this.value.trim();
+            if (search.length < 2) {
+                userSearchResults.style.display = 'none';
+                addEditorBtn.disabled = true;
+                return;
+            }
+
+            fetch(`ajax/search_users.php?search=${encodeURIComponent(search)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        userSearchResults.innerHTML = '';
+                        if (data.users.length > 0) {
+                            data.users.forEach(user => {
+                                const item = document.createElement('a');
+                                item.href = '#';
+                                item.className = 'list-group-item list-group-item-action';
+                                item.textContent = user.name ? `${user.name} (${user.email})` : user.email;
+                                item.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    editorSearch.value = user.name ? `${user.name} (${user.email})` : user.email;
+                                    selectedUser = user;
+                                    userSearchResults.style.display = 'none';
+                                    addEditorBtn.disabled = false;
+                                });
+                                userSearchResults.appendChild(item);
+                            });
+                            userSearchResults.style.display = 'block';
+                        } else {
+                            const noResults = document.createElement('div');
+                            noResults.className = 'list-group-item';
+                            if (data.message) {
+                                const alert = document.createElement('div');
+                                alert.className = 'alert alert-warning mb-0';
+                                alert.innerHTML = `
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    ${data.message}
+                                `;
+                                noResults.appendChild(alert);
+                            } else {
+                                noResults.textContent = 'Inga användare hittades';
+                                noResults.classList.add('text-muted');
+                            }
+                            userSearchResults.appendChild(noResults);
+                            userSearchResults.style.display = 'block';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+
+        // Lägg till redaktör
+        addEditorBtn.addEventListener('click', function() {
+            if (!selectedUser) return;
+
+            fetch('ajax/add_course_editor.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `course_id=${courseId}&email=${encodeURIComponent(selectedUser.email)}&csrf_token=<?= $_SESSION['csrf_token'] ?>`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const editorItem = document.createElement('div');
+                    editorItem.className = 'd-flex justify-content-between align-items-center mb-2 editor-item';
+                    editorItem.setAttribute('data-email', selectedUser.email);
+                    editorItem.innerHTML = `
+                        <span>${selectedUser.name ? `${selectedUser.name} (${selectedUser.email})` : selectedUser.email}</span>
+                        <button class="btn btn-sm btn-danger remove-editor" type="button">Ta bort</button>
+                    `;
+                    editorsList.appendChild(editorItem);
+                    editorSearch.value = '';
+                    selectedUser = null;
+                    addEditorBtn.disabled = true;
+                } else {
+                    alert(data.message || 'Ett fel uppstod');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ett fel uppstod');
+            });
+        });
+
+        // Ta bort redaktör
+        editorsList.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-editor')) {
+                const editorItem = e.target.closest('.editor-item');
+                const email = editorItem.getAttribute('data-email');
+
+                fetch('ajax/remove_course_editor.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `course_id=${courseId}&email=${encodeURIComponent(email)}&csrf_token=<?= $_SESSION['csrf_token'] ?>`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        editorItem.remove();
+                    } else {
+                        alert(data.message || 'Ett fel uppstod');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Ett fel uppstod');
+                });
+            }
+        });
+
+        // Dölj sökresultat när man klickar utanför
+        document.addEventListener('click', function(e) {
+            if (!editorSearch.contains(e.target) && !userSearchResults.contains(e.target)) {
+                userSearchResults.style.display = 'none';
+            }
+        });
+    }
 });
 </script>
+<?php endif; ?>
 
 <?php
 // Inkludera footer

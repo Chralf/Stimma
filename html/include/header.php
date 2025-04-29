@@ -72,13 +72,21 @@
                     
                     <!-- Admin and logout buttons -->
                     <?php 
-                    // Check if user has admin privileges
+                    // Check if user has admin privileges or is a course editor
                     $isAdmin = false;
+                    $isCourseEditor = false;
+                    
                     if (isset($_SESSION['user_id'])) {
+                        // Check admin status
                         $user = queryOne("SELECT is_admin FROM " . DB_DATABASE . ".users WHERE id = ?", [$_SESSION['user_id']]);
                         $isAdmin = $user ? (bool)$user['is_admin'] : false;
+                        
+                        // Check if user is a course editor
+                        $editor = queryOne("SELECT 1 FROM " . DB_DATABASE . ".course_editors WHERE email = ?", [$_SESSION['user_email']]);
+                        $isCourseEditor = $editor ? true : false;
                     }
-                    if ($isAdmin): ?>
+                    
+                    if ($isAdmin || $isCourseEditor): ?>
                         <!-- Admin panel link (hidden on small screens) -->
                         <a href="<?= htmlspecialchars(BASE_PATH_URL) ?>/admin/index.php" 
                            class="btn btn-link p-1 me-2 d-inline-flex align-items-center justify-content-center d-none d-sm-inline-flex" 

@@ -106,7 +106,7 @@ CREATE TABLE `logs` (
   PRIMARY KEY (`id`),
   KEY `idx_email` (`email`),
   KEY `idx_created_at` (`created_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 -- Tabellstruktur `progress`
 CREATE TABLE `progress` (
@@ -120,7 +120,7 @@ CREATE TABLE `progress` (
   `score` int(11) DEFAULT 0,
   `updated_at` timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 -- Tabellstruktur `resources`
 CREATE TABLE `resources` (
@@ -155,7 +155,46 @@ CREATE TABLE `users` (
   `preferences` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`preferences`)),
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
+
+-- Tabellstruktur `course_editors`
+CREATE TABLE `course_editors` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_id` int(11) NOT NULL,
+  `email` varchar(150) NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `created_by` varchar(150) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_course_editor` (`course_id`,`email`),
+  KEY `idx_email` (`email`),
+  CONSTRAINT `course_editors_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
+
+-- Tabellstruktur `user_progress`
+CREATE TABLE `user_progress` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `lesson_id` int(11) NOT NULL,
+  `status` enum('not_started','in_progress','completed') NOT NULL DEFAULT 'not_started',
+  `last_accessed` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_lesson` (`user_id`,`lesson_id`),
+  KEY `lesson_id` (`lesson_id`),
+  CONSTRAINT `user_progress_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `user_progress_ibfk_2` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
+
+-- Tabellstruktur `activity_log`
+CREATE TABLE `activity_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_email` varchar(150) NOT NULL,
+  `action` varchar(255) NOT NULL,
+  `details` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `user_email` (`user_email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 -- Skapa relationer/främmande nycklar
 ALTER TABLE `categories`
@@ -191,6 +230,9 @@ Du bör se följande tabeller:
 - progress
 - resources
 - users
+- course_editors
+- user_progress
+- activity_log
 
 ## Steg 5: Uppdatera konfigurationen
 

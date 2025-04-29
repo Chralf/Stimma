@@ -141,3 +141,13 @@ function logout() {
     
     redirect('index.php');
 }
+
+/**
+ * Kontrollerar om en användare är admin
+ * @param string $email Användarens e-postadress
+ * @return bool True om användaren är admin, annars false
+ */
+function isAdmin($email) {
+    $user = queryOne("SELECT is_admin FROM " . DB_DATABASE . ".users WHERE email = ?", [$email]);
+    return $user && $user['is_admin'] == 1;
+}

@@ -20,6 +20,18 @@ require_once '../include/auth.php';
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
     $courseId = (int)$_GET['id'];
     
+    // Kontrollera om användaren har behörighet att radera kursen
+    if (!isAdmin($_SESSION['user_email'])) {
+        // Kontrollera om användaren är redaktör för kursen
+        $isEditor = queryOne("SELECT 1 FROM " . DB_DATABASE . ".course_editors WHERE course_id = ? AND email = ?", [$courseId, $_SESSION['user_email']]);
+        if (!$isEditor) {
+            $_SESSION['message'] = 'Du har inte behörighet att radera denna kurs.';
+            $_SESSION['message_type'] = 'danger';
+            header('Location: courses.php');
+            exit;
+        }
+    }
+    
     // Kontrollera om kursen har lektioner
     $lessons = query("SELECT COUNT(*) as count FROM " . DB_DATABASE . ".lessons WHERE course_id = ?", [$courseId]);
     $lessonCount = $lessons[0]['count'];
@@ -45,14 +57,31 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
 // Sätt sidtitel
 $page_title = 'Kurshantering';
 
-// Hämta alla kurser med antal lektioner
-$courses = queryAll("
-    SELECT c.*, COUNT(l.id) as lesson_count 
-    FROM " . DB_DATABASE . ".courses c 
-    LEFT JOIN " . DB_DATABASE . ".lessons l ON c.id = l.course_id 
-    GROUP BY c.id 
-    ORDER BY c.sort_order ASC
-");
+// Hämta användarens e-post
+$userEmail = $_SESSION['user_email'];
+
+// Hämta kurser baserat på användarens behörighet
+if (isAdmin($userEmail)) {
+    // Administratörer ser alla kurser
+    $courses = queryAll("
+        SELECT c.*, COUNT(l.id) as lesson_count 
+        FROM " . DB_DATABASE . ".courses c 
+        LEFT JOIN " . DB_DATABASE . ".lessons l ON c.id = l.course_id 
+        GROUP BY c.id 
+        ORDER BY c.sort_order ASC
+    ");
+} else {
+    // Redaktörer ser endast sina kurser
+    $courses = queryAll("
+        SELECT c.*, COUNT(l.id) as lesson_count 
+        FROM " . DB_DATABASE . ".courses c 
+        LEFT JOIN " . DB_DATABASE . ".lessons l ON c.id = l.course_id 
+        INNER JOIN " . DB_DATABASE . ".course_editors ce ON c.id = ce.course_id 
+        WHERE ce.email = ?
+        GROUP BY c.id 
+        ORDER BY c.sort_order ASC
+    ", [$userEmail]);
+}
 
 // Inkludera header
 require_once 'include/header.php';
@@ -62,9 +91,11 @@ require_once 'include/header.php';
     <div class="card-header py-3 d-flex justify-content-between align-items-center">
         <h6 class="m-0 font-weight-bold text-muted">Kurser</h6>
         <div class="d-flex gap-2">
-            <a href="import.php" class="btn btn-sm btn-secondary">
-                <i class="bi bi-upload"></i> Importera kurs
-            </a>
+            <?php if (isAdmin($userEmail)): ?>
+                <a href="import.php" class="btn btn-sm btn-secondary">
+                    <i class="bi bi-upload"></i> Importera kurs
+                </a>
+            <?php endif; ?>
             <a href="edit_course.php" class="btn btn-sm btn-primary">
                 <i class="bi bi-plus-lg"></i> Ny kurs
             </a>
