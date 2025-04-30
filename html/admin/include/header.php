@@ -17,6 +17,31 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit;
 }
 
+// Kontrollera att användaren är redaktör
+$editor = queryOne("SELECT COUNT(*) as count FROM " . DB_DATABASE . ".course_editors WHERE email = ?", [$_SESSION['user_email']]);
+if (!$editor || $editor['count'] === 0) {
+    // Användaren är inte redaktör - logga ut
+    session_unset();
+    session_destroy();
+    header('Location: login.php?access=denied');
+    exit;
+}
+
+// Kontrollera om användaren är admin
+$admin = queryOne("SELECT is_admin FROM " . DB_DATABASE . ".users WHERE email = ?", [$_SESSION['user_email']]);
+$isAdmin = $admin && $admin['is_admin'] == 1;
+
+// Enkel session timeout (30 minuter)
+if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 1800)) {
+    session_unset();
+    session_destroy();
+    header('Location: login.php?timeout=1');
+    exit;
+}
+
+// Uppdatera senaste aktiviteten
+$_SESSION['last_activity'] = time();
+
 // Generera CSRF-token om den inte redan finns
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -24,9 +49,6 @@ if (empty($_SESSION['csrf_token'])) {
 
 // Bestäm aktiv sida
 $current_page = basename($_SERVER['PHP_SELF']);
-
-// Kontrollera om användaren är admin
-$isAdmin = isAdmin($_SESSION['user_email']);
 ?>
 <!DOCTYPE html>
 <html lang="sv">

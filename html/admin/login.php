@@ -24,10 +24,11 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
 
 // Kontrollera om användaren är inloggad
 if (isLoggedIn()) {
-    // Kontrollera om användaren har admin-behörighet
-    $user = queryOne("SELECT is_admin FROM " . DB_DATABASE . ".users WHERE id = ?", [$_SESSION['user_id']]);
+    // Kontrollera om användaren är kursredaktör
+    $editor = queryOne("SELECT COUNT(*) as count FROM " . DB_DATABASE . ".course_editors WHERE email = ?", [$_SESSION['user_email']]);
+    $isCourseEditor = $editor && $editor['count'] > 0;
     
-    if ($user && $user['is_admin']) {
+    if ($isCourseEditor) {
         // Sätt admin-session och omdirigera till dashboard
         $_SESSION['admin_logged_in'] = true;
         
@@ -37,7 +38,7 @@ if (isLoggedIn()) {
         header('Location: index.php');
         exit;
     } else {
-        // Användaren är inloggad men har inte admin-behörighet
+        // Användaren är inloggad men har inte redaktörsbehörighet
         $_SESSION['message'] = 'Du har inte behörighet att komma åt admin-sektionen.';
         $_SESSION['message_type'] = 'danger';
         header('Location: ../index.php');
@@ -59,29 +60,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['message'] = 'Vänligen fyll i både e-post och lösenord.';
         $_SESSION['message_type'] = 'danger';
     } else {
-        $user = queryOne("SELECT id, email, password, is_admin FROM " . DB_DATABASE . ".users WHERE email = ?", [$email]);
+        $user = queryOne("SELECT id, email, password FROM " . DB_DATABASE . ".users WHERE email = ?", [$email]);
         
         if ($user && password_verify($password, $user['password'])) {
             // Sätt alla nödvändiga session-variabler
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_email'] = $user['email'];
-            $_SESSION['is_admin'] = $user['is_admin'];
             
             // Kontrollera om användaren är kursredaktör
             $editor = queryOne("SELECT COUNT(*) as count FROM " . DB_DATABASE . ".course_editors WHERE email = ?", [$email]);
             $isCourseEditor = $editor && $editor['count'] > 0;
             
-            // Sätt admin_logged_in om användaren är admin eller kursredaktör
-            if ($user['is_admin'] == 1 || $isCourseEditor) {
+            if ($isCourseEditor) {
                 $_SESSION['admin_logged_in'] = true;
+                
+                // Logga inloggningen
+                logActivity($user['email'], "Loggade in i admin-panelen");
+                
+                // Omdirigera till admin-sidan
+                header('Location: courses.php');
+                exit;
+            } else {
+                $_SESSION['message'] = 'Du har inte behörighet att komma åt admin-sektionen.';
+                $_SESSION['message_type'] = 'danger';
+                header('Location: ../index.php');
+                exit;
             }
-            
-            // Logga inloggningen
-            logActivity($user['id'], 'login', 'User logged in');
-            
-            // Omdirigera till admin-sidan
-            header('Location: courses.php');
-            exit;
         } else {
             $_SESSION['message'] = 'Felaktig e-post eller lösenord.';
             $_SESSION['message_type'] = 'danger';
