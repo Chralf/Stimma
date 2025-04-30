@@ -39,8 +39,8 @@ if (isLoggedIn()) {
         exit;
     } else {
         // Användaren är inloggad men har inte redaktörsbehörighet
-        $_SESSION['message'] = 'Du har inte behörighet att komma åt admin-sektionen.';
-        $_SESSION['message_type'] = 'danger';
+        $_SESSION['message'] = 'Du har inte behörighet att komma åt admin-sektionen, men är välkommen som redaktör!';
+        $_SESSION['message_type'] = 'warning';
         header('Location: ../index.php');
         exit;
     }
