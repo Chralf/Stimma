@@ -352,7 +352,7 @@ else:
                     </div>
                     
                     <?php if (!$hasStartedCourses): ?>
-                        <div class="alert alert-info">
+                        <div class="alert alert-info mt-4">
                             Du har inte påbörjat några kurser än.
                         </div>
                     <?php endif; ?>

@@ -92,6 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     content = ?, 
                     course_id = ?,
                     image_url = ?,
+                    video_url = ?,
                     status = ?,
                     ai_instruction = ?,
                     ai_prompt = ?,
@@ -102,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     quiz_correct_answer = ?,
                     updated_at = NOW() 
                     WHERE id = ?", 
-                    [$title, $content, $course_id, $image_url, $status, 
+                    [$title, $content, $course_id, $image_url, $_POST['video_url'], $status, 
                      $ai_instruction, $ai_prompt, $quiz_question,
                      $quiz_answer1, $quiz_answer2, $quiz_answer3, $quiz_correct_answer,
                      $_GET['id']]);
@@ -117,12 +118,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Skapa ny lektion
             execute("INSERT INTO " . DB_DATABASE . ".lessons 
-                    (title, content, course_id, image_url, status, 
+                    (title, content, course_id, image_url, video_url, status, 
                      ai_instruction, ai_prompt, quiz_question,
                      quiz_answer1, quiz_answer2, quiz_answer3, quiz_correct_answer,
                      sort_order, created_at, updated_at) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())", 
-                    [$title, $content, $course_id, $image_url, $status,
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())", 
+                    [$title, $content, $course_id, $image_url, $_POST['video_url'], $status,
                      $ai_instruction, $ai_prompt, $quiz_question,
                      $quiz_answer1, $quiz_answer2, $quiz_answer3, $quiz_correct_answer,
                      $maxOrder + 1]);
@@ -262,6 +263,16 @@ $courses = queryAll("SELECT * FROM " . DB_DATABASE . ".courses ORDER BY sort_ord
                             <?php endif; ?>
                             <input type="file" class="form-control" id="image" name="image" accept="image/jpeg,image/png,image/gif">
                             <div class="form-text">Max 5MB. Tillåtna format: JPG, PNG, GIF</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                <input type="url" class="form-control" id="video_url" name="video_url" 
+                                       value="<?= htmlspecialchars($lesson['video_url'] ?? '') ?>"
+                                       placeholder="https://www.youtube.com/watch?v=...">
+                                <label for="video_url">YouTube-länk</label>
+                            </div>
+                            <div class="form-text">Klistra in en YouTube-länk (t.ex. https://www.youtube.com/watch?v=...) eller en embed-länk</div>
                         </div>
 
                         <div class="mb-3">

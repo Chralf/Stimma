@@ -215,6 +215,18 @@ $page_title = $systemName . ' - ' . sanitize($lesson['course_title']) . ' - ' . 
 
 // Include header template
 include 'include/header.php';
+
+/**
+ * Convert YouTube watch URL to embed URL with privacy enhancements
+ * @param string $url YouTube URL
+ * @return string Embed URL with privacy parameters
+ */
+function convertYoutubeUrl($url) {
+    if (preg_match('/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/', $url, $matches)) {
+        return 'https://www.youtube-nocookie.com/embed/' . $matches[1] . '?rel=0&modestbranding=1';
+    }
+    return str_replace('youtube.com', 'youtube-nocookie.com', $url);
+}
 ?>
 
 <!-- Main content container -->
@@ -276,6 +288,26 @@ include 'include/header.php';
                         </div>
                     </div>
                 </div>
+
+                <!-- Video Section -->
+                <?php if (!empty($lesson['video_url'])): ?>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="bi bi-youtube me-2"></i> Video
+                    </div>
+                    <div class="card-body">
+                        <div class="ratio ratio-16x9">
+                            <iframe 
+                                src="<?= htmlspecialchars(convertYoutubeUrl($lesson['video_url'])) ?>" 
+                                title="Lesson video" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen
+                                loading="lazy">
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
                 
                 <!-- AI chat interface card -->
                 <div class="card mb-4">
@@ -309,10 +341,12 @@ include 'include/header.php';
                 
                 <!-- Quiz-sektion -->
                 <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-question-circle me-2"></i> Quiz
+                    </div>
                     <div class="card-body">
                         <?php if (!empty($lesson['quiz_question'])): ?>
                             <div class="quiz-section mb-4">
-                                <h3 class="h4 mb-3">Quiz</h3>
                                 <?php if (isset($_SESSION['flash_message']) && $_SESSION['flash_type'] === 'danger'): ?>
                                 <div class="alert alert-danger mb-3">
                                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
