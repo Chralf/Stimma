@@ -16,16 +16,16 @@ require_once '../include/auth.php';
 
 // Hantera AJAX-anrop separat
 if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest') {
-    // Kontrollera att användaren är inloggad och har admin-rättigheter
+    // Kontrollera att användaren är inloggad
     if (!isLoggedIn() || !isset($_SESSION['user_id'])) {
         header('Content-Type: application/json');
         echo json_encode(['success' => false, 'message' => 'Du måste vara inloggad.']);
         exit;
     }
 
-    // Kontrollera admin-rättigheter
-    $user = queryOne("SELECT is_admin FROM " . DB_DATABASE . ".users WHERE id = ?", [$_SESSION['user_id']]);
-    if (!$user || $user['is_admin'] !== 1) {
+    // Kontrollera behörighet
+    $user = queryOne("SELECT is_admin, is_editor FROM " . DB_DATABASE . ".users WHERE id = ?", [$_SESSION['user_id']]);
+    if (!$user || ($user['is_admin'] !== 1 && $user['is_editor'] !== 1)) {
         header('Content-Type: application/json');
         echo json_encode(['success' => false, 'message' => 'Du har inte behörighet.']);
         exit;
@@ -56,13 +56,19 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'
             // Börja transaktion
             execute("START TRANSACTION");
             
+            // Hämta användarens ID
+            $user = queryOne("SELECT id FROM " . DB_DATABASE . ".users WHERE email = ?", [$_SESSION['user_email']]);
+            if (!$user) {
+                throw new Exception('Kunde inte hitta användarinformation.');
+            }
+            
             // Skapa kursen
             $courseId = execute("
                 INSERT INTO " . DB_DATABASE . ".courses (
                     title, description, difficulty_level, duration_minutes, 
                     prerequisites, tags, image_url, status, sort_order, 
-                    featured, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+                    featured, author_id, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
             ", [
                 $data['course']['title'],
                 $data['course']['description'],
@@ -73,7 +79,8 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'
                 $data['course']['image_url'] ?? null,
                 'inactive', // Sätt alltid till inaktiv vid import
                 $data['course']['sort_order'] ?? 0,
-                $data['course']['featured'] ?? 0
+                $data['course']['featured'] ?? 0,
+                $user['id'] // Använd den inloggade användarens ID som author_id
             ]);
 
             // Förbered statusinformation
@@ -95,9 +102,9 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'
                             video_url, content, resource_links, tags, status, 
                             sort_order, ai_instruction, ai_prompt, 
                             quiz_question, quiz_answer1, quiz_answer2, 
-                            quiz_answer3, quiz_correct_answer, created_at, 
+                            quiz_answer3, quiz_correct_answer, author_id, created_at, 
                             updated_at
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
                     ", [
                         $courseId,
                         $lesson['title'],
@@ -115,7 +122,8 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'
                         $lesson['quiz_answer1'] ?? null,
                         $lesson['quiz_answer2'] ?? null,
                         $lesson['quiz_answer3'] ?? null,
-                        $lesson['quiz_correct_answer'] ?? null
+                        $lesson['quiz_correct_answer'] ?? null,
+                        $user['id'] // Använd samma author_id som för kursen
                     ]);
 
                     // Lägg till status för varje lektion
@@ -159,15 +167,15 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'
 }
 
 // Vanlig sidvisning
-// Kontrollera att användaren är inloggad och har admin-rättigheter
+// Kontrollera att användaren är inloggad
 if (!isLoggedIn() || !isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
 }
 
-// Kontrollera admin-rättigheter
-$user = queryOne("SELECT is_admin FROM " . DB_DATABASE . ".users WHERE id = ?", [$_SESSION['user_id']]);
-if (!$user || $user['is_admin'] !== 1) {
+// Kontrollera behörighet
+$user = queryOne("SELECT is_admin, is_editor FROM " . DB_DATABASE . ".users WHERE id = ?", [$_SESSION['user_id']]);
+if (!$user || ($user['is_admin'] !== 1 && $user['is_editor'] !== 1)) {
     header('Location: login.php');
     exit;
 }

@@ -116,17 +116,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Hitta högsta sort_order för denna kurs
             $maxOrder = queryOne("SELECT MAX(sort_order) as max_order FROM " . DB_DATABASE . ".lessons WHERE course_id = ?", [$course_id])['max_order'] ?? 0;
             
+            // Hämta användarens ID
+            $author = queryOne("SELECT id FROM " . DB_DATABASE . ".users WHERE email = ?", [$_SESSION['user_email']]);
+            $authorId = $author ? $author['id'] : null;
+            
             // Skapa ny lektion
             execute("INSERT INTO " . DB_DATABASE . ".lessons 
                     (title, content, course_id, image_url, video_url, status, 
                      ai_instruction, ai_prompt, quiz_question,
                      quiz_answer1, quiz_answer2, quiz_answer3, quiz_correct_answer,
-                     sort_order, created_at, updated_at) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())", 
+                     sort_order, author_id, created_at, updated_at) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())", 
                     [$title, $content, $course_id, $image_url, $_POST['video_url'], $status,
                      $ai_instruction, $ai_prompt, $quiz_question,
                      $quiz_answer1, $quiz_answer2, $quiz_answer3, $quiz_correct_answer,
-                     $maxOrder + 1]);
+                     $maxOrder + 1, $authorId]);
             
             $newId = getDb()->lastInsertId();
             logActivity($_SESSION['user_email'], "Skapade ny lektion '" . $title . "' (ID: " . $newId . ")");

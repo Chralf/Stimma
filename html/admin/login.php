@@ -24,22 +24,15 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
 
 // Kontrollera om användaren är inloggad
 if (isLoggedIn()) {
-    // Kontrollera om användaren är kursredaktör
-    $editor = queryOne("SELECT COUNT(*) as count FROM " . DB_DATABASE . ".course_editors WHERE email = ?", [$_SESSION['user_email']]);
-    $isCourseEditor = $editor && $editor['count'] > 0;
-    
-    if ($isCourseEditor) {
-        // Sätt admin-session och omdirigera till dashboard
+    // Kontrollera om användaren är admin eller redaktör
+    $user = queryOne("SELECT is_admin, is_editor FROM " . DB_DATABASE . ".users WHERE email = ?", [$_SESSION['user_email']]);
+    if ($user && ($user['is_admin'] == 1 || $user['is_editor'] == 1)) {
         $_SESSION['admin_logged_in'] = true;
-        
-        // Logga inloggningen
-        logActivity($_SESSION['user_email'], "Loggade in i admin-panelen");
-        
         header('Location: index.php');
         exit;
     } else {
-        // Användaren är inloggad men har inte redaktörsbehörighet
-        $_SESSION['message'] = 'Du har inte behörighet att komma åt admin-sektionen, men är välkommen som redaktör!';
+        // Användaren är inloggad men har inte admin- eller redaktörsbehörighet
+        $_SESSION['message'] = 'Du har inte behörighet att komma åt admin-sektionen.';
         $_SESSION['message_type'] = 'warning';
         header('Location: ../index.php');
         exit;

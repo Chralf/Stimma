@@ -60,8 +60,12 @@ $page_title = 'Kurshantering';
 // Hämta användarens e-post
 $userEmail = $_SESSION['user_email'];
 
+// Hämta användarens rättigheter
+$user = queryOne("SELECT is_admin, is_editor FROM " . DB_DATABASE . ".users WHERE email = ?", [$userEmail]);
+$isAdmin = $user && $user['is_admin'] == 1;
+
 // Hämta kurser baserat på användarens behörighet
-if (isAdmin($userEmail)) {
+if ($isAdmin) {
     // Administratörer ser alla kurser
     $courses = queryAll("
         SELECT c.*, COUNT(l.id) as lesson_count 
@@ -71,7 +75,7 @@ if (isAdmin($userEmail)) {
         ORDER BY c.sort_order ASC
     ");
 } else {
-    // Redaktörer ser endast sina kurser
+    // Redaktörer ser bara sina tilldelade kurser
     $courses = queryAll("
         SELECT c.*, COUNT(l.id) as lesson_count 
         FROM " . DB_DATABASE . ".courses c 
@@ -91,11 +95,9 @@ require_once 'include/header.php';
     <div class="card-header py-3 d-flex justify-content-between align-items-center">
         <h6 class="m-0 font-weight-bold text-muted">Kurser</h6>
         <div class="d-flex gap-2">
-            <?php if (isAdmin($userEmail)): ?>
-                <a href="import.php" class="btn btn-sm btn-secondary">
-                    <i class="bi bi-upload"></i> Importera kurs
-                </a>
-            <?php endif; ?>
+            <a href="import.php" class="btn btn-sm btn-secondary">
+                <i class="bi bi-upload"></i> Importera kurs
+            </a>
             <a href="edit_course.php" class="btn btn-sm btn-primary">
                 <i class="bi bi-plus-lg"></i> Ny kurs
             </a>

@@ -63,6 +63,21 @@ if ($lessonCount > 0) {
     exit;
 }
 
+// Kontrollera om användaren har behörighet att radera kursen
+$user = queryOne("SELECT is_admin, is_editor FROM " . DB_DATABASE . ".users WHERE email = ?", [$userEmail]);
+$isAdmin = $user && $user['is_admin'] == 1;
+
+if (!$isAdmin) {
+    // Kontrollera om användaren är redaktör för denna specifika kurs
+    $isEditor = queryOne("SELECT 1 FROM " . DB_DATABASE . ".course_editors WHERE course_id = ? AND email = ?", [$courseId, $userEmail]);
+    if (!$isEditor) {
+        $_SESSION['message'] = 'Du har inte behörighet att radera denna kurs.';
+        $_SESSION['message_type'] = 'danger';
+        header('Location: courses.php');
+        exit;
+    }
+}
+
 // Radera kursen
 try {
     execute("DELETE FROM " . DB_DATABASE . ".courses WHERE id = ?", [$courseId]);

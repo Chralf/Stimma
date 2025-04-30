@@ -26,7 +26,8 @@ if (!isLoggedIn()) {
 
 // Hämta användarens behörigheter
 $userEmail = $_SESSION['user_email'];
-$isAdmin = isAdmin($userEmail);
+$user = queryOne("SELECT is_admin, is_editor FROM " . DB_DATABASE . ".users WHERE email = ?", [$userEmail]);
+$isAdmin = $user && $user['is_admin'] == 1;
 
 // Hämta kursdata om vi redigerar en befintlig kurs
 $course = null;
@@ -43,6 +44,7 @@ if (isset($_GET['id'])) {
     
     // Kontrollera om användaren har behörighet att redigera kursen
     if (!$isAdmin) {
+        // Kontrollera om användaren är redaktör för denna specifika kurs
         $isEditor = queryOne("SELECT 1 FROM " . DB_DATABASE . ".course_editors WHERE course_id = ? AND email = ?", [$courseId, $userEmail]);
         if (!$isEditor) {
             $_SESSION['message'] = 'Du har inte behörighet att redigera denna kurs.';
@@ -117,11 +119,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Hitta högsta sort_order
                 $maxOrder = queryOne("SELECT MAX(sort_order) as max_order FROM " . DB_DATABASE . ".courses")['max_order'] ?? 0;
                 
+                // Hämta användarens ID
+                $author = queryOne("SELECT id FROM " . DB_DATABASE . ".users WHERE email = ?", [$_SESSION['user_email']]);
+                $authorId = $author ? $author['id'] : null;
+                
                 // Skapa ny kurs med nästa sort_order
                 execute("INSERT INTO " . DB_DATABASE . ".courses 
-                        (title, description, status, sort_order, image_url, created_at, updated_at) 
-                        VALUES (?, ?, ?, ?, ?, NOW(), NOW())", 
-                        [$title, $description, $status, $maxOrder + 1, $imageUrl]);
+                        (title, description, status, sort_order, image_url, author_id, created_at, updated_at) 
+                        VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())", 
+                        [$title, $description, $status, $maxOrder + 1, $imageUrl, $authorId]);
+                
+                // Hämta det nya kurs-ID:t
+                $newCourseId = getDb()->lastInsertId();
+                
+                // Lägg till skaparen som redaktör för kursen
+                execute("INSERT INTO " . DB_DATABASE . ".course_editors 
+                        (course_id, email, created_by) 
+                        VALUES (?, ?, ?)", 
+                        [$newCourseId, $_SESSION['user_email'], $_SESSION['user_email']]);
                 
                 $_SESSION['message'] = 'Kursen har skapats.';
             }

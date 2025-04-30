@@ -151,6 +151,7 @@ CREATE TABLE `users` (
   `last_login_at` datetime DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `is_admin` tinyint(1) DEFAULT 0,
+  `is_editor` tinyint(1) DEFAULT 0,
   `role` enum('student','teacher','admin','super_admin') DEFAULT 'student',
   `preferences` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`preferences`)),
   PRIMARY KEY (`id`),

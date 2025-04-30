@@ -88,6 +88,29 @@ if (isset($_POST['action']) && $_POST['action'] === 'toggle_admin' && isset($_PO
     exit;
 }
 
+// Hantera ändring av redaktör-status
+if (isset($_POST['action']) && $_POST['action'] === 'toggle_editor' && isset($_POST['user_id'])) {
+    $userId = (int)$_POST['user_id'];
+    $isEditor = (int)$_POST['is_editor'];
+    
+    try {
+        execute("UPDATE " . DB_DATABASE . ".users SET is_editor = ? WHERE id = ?", [$isEditor, $userId]);
+        
+        // Logga ändringen
+        logActivity($_SESSION['user_email'], "Ändrade redaktör-status för användare med ID: " . $userId . " till " . ($isEditor ? "redaktör" : "icke-redaktör"));
+        
+        $_SESSION['message'] = "Användarens redaktör-status har uppdaterats.";
+        $_SESSION['message_type'] = "success";
+    } catch (Exception $e) {
+        $_SESSION['message'] = "Ett fel uppstod vid uppdatering av redaktör-status: " . $e->getMessage();
+        $_SESSION['message_type'] = "danger";
+    }
+    
+    // Omdirigera för att undvika omladdningsproblem
+    header('Location: users.php');
+    exit;
+}
+
 // Hantera skapande av ny användare
 if (isset($_POST['action']) && $_POST['action'] === 'create_user') {
     $email = $_POST['email'] ?? '';
@@ -161,6 +184,7 @@ require_once 'include/header.php';
                                     <th>E-post</th>
                                     <th>Verifierad</th>
                                     <th>Admin</th>
+                                    <th>Redaktör</th>
                                     <th>Framsteg</th>
                                     <th>Åtgärder</th>
                                 </tr>
@@ -186,6 +210,18 @@ require_once 'include/header.php';
                                                     <button type="submit" class="btn btn-sm <?= $user['is_admin'] ? 'btn-success' : 'btn-secondary' ?>">
                                                         <i class="bi <?= $user['is_admin'] ? 'bi-check-circle-fill' : 'bi-circle' ?>"></i>
                                                         <?= $user['is_admin'] ? 'Admin' : 'Ej admin' ?>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                            <td>
+                                                <form method="post" class="d-inline" onsubmit="return confirm('Är du säker på att du vill ändra redaktör-status för denna användare?');">
+                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+                                                    <input type="hidden" name="action" value="toggle_editor">
+                                                    <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
+                                                    <input type="hidden" name="is_editor" value="<?= $user['is_editor'] ? '0' : '1' ?>">
+                                                    <button type="submit" class="btn btn-sm <?= $user['is_editor'] ? 'btn-success' : 'btn-secondary' ?>">
+                                                        <i class="bi <?= $user['is_editor'] ? 'bi-check-circle-fill' : 'bi-circle' ?>"></i>
+                                                        <?= $user['is_editor'] ? 'Redaktör' : 'Ej redaktör' ?>
                                                     </button>
                                                 </form>
                                             </td>

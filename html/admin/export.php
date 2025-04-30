@@ -20,13 +20,6 @@ if (!isLoggedIn()) {
     exit;
 }
 
-// Kontrollera admin-rättigheter
-$user = queryOne("SELECT is_admin FROM " . DB_DATABASE . ".users WHERE id = ?", [$_SESSION['user_id']]);
-if (!$user || $user['is_admin'] !== 1) {
-    header('Location: login.php');
-    exit;
-}
-
 // Kontrollera att ett kurs-ID har skickats med
 if (!isset($_GET['id'])) {
     $_SESSION['message'] = 'Inget kurs-ID angivet.';
@@ -36,6 +29,21 @@ if (!isset($_GET['id'])) {
 }
 
 $courseId = (int)$_GET['id'];
+
+// Kontrollera behörighet
+$user = queryOne("SELECT is_admin FROM " . DB_DATABASE . ".users WHERE id = ?", [$_SESSION['user_id']]);
+$isAdmin = $user && $user['is_admin'] == 1;
+
+if (!$isAdmin) {
+    // Kontrollera om användaren är redaktör för kursen
+    $isEditor = queryOne("SELECT 1 FROM " . DB_DATABASE . ".course_editors WHERE course_id = ? AND email = ?", [$courseId, $_SESSION['user_email']]);
+    if (!$isEditor) {
+        $_SESSION['message'] = 'Du har inte behörighet att exportera denna kurs.';
+        $_SESSION['message_type'] = 'danger';
+        header('Location: courses.php');
+        exit;
+    }
+}
 
 // Hämta kursinformation
 $course = queryOne("SELECT * FROM " . DB_DATABASE . ".courses WHERE id = ?", [$courseId]);
