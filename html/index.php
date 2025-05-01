@@ -506,7 +506,7 @@ else:
                                 </div>
                                 
                                 <div class="card-footer bg-white border-top-0">
-                                    <a href="lesson.php?id=<?= $firstLesson['id'] ?>" class="btn btn-outline-success btn-sm w-100">
+                                    <a href="lesson.php?id=<?= $firstLesson['id'] ?>" class="btn btn-outline-primary btn-sm w-100">
                                         Börja kursen
                                     </a>
                                 </div>
