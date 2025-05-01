@@ -158,6 +158,20 @@ else:
     // Get user's progress
     $progress = query("SELECT * FROM " . DB_DATABASE . ".progress WHERE user_id = ?", [$userId]);
     
+    // Get user's email and domain
+    $user = queryOne("SELECT email FROM " . DB_DATABASE . ".users WHERE id = ?", [$userId]);
+    $userDomain = substr(strrchr($user['email'], "@"), 1);
+    
+    // Fetch organization courses (courses created by users with same domain)
+    $orgCourses = query("
+        SELECT DISTINCT c.*, u.email as author_email
+        FROM " . DB_DATABASE . ".courses c
+        JOIN " . DB_DATABASE . ".users u ON c.author_id = u.id
+        WHERE c.status = 'active'
+        AND SUBSTRING_INDEX(u.email, '@', -1) = ?
+        ORDER BY c.sort_order
+    ", [$userDomain]);
+    
     // Create array for easy access to user progress
     $userProgress = [];
     foreach ($progress as $item) {
@@ -240,7 +254,7 @@ else:
     require_once 'include/header.php';
 ?>
     <!-- Main content container -->
-    <div class="container-sm py-4">
+    <div class="container-fluid px-3 px-md-4 py-4">
         <div class="row">
             <!-- Left sidebar (empty on desktop) -->
             <div class="col-lg-2 d-none d-lg-block"></div>
@@ -249,18 +263,18 @@ else:
                 <main>
                     <!-- Next lesson card -->
                     <?php if ($nextLesson): ?>
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body px-3 py-3">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                                <div class="me-md-3">
                                     <span class="badge bg-secondary mb-2">Nästa lektion</span>
-                                    <h2 class="card-title h4"><?= sanitize($nextLesson['title']) ?></h2>
-                                    <p class="text-muted mb-2">Kurs: <?= sanitize($nextCourse) ?></p>
+                                    <h2 class="card-title fs-5 text-truncate"><?= sanitize($nextLesson['title']) ?></h2>
+                                    <p class="text-muted small mb-2">Kurs: <?= sanitize($nextCourse) ?></p>
                                     <?php if (!empty($nextLesson['description'])): ?>
-                                        <p class="card-text"><?= sanitize($nextLesson['description']) ?></p>
+                                        <p class="card-text small"><?= sanitize($nextLesson['description']) ?></p>
                                     <?php endif; ?>
                                 </div>
-                                <a href="lesson.php?id=<?= $nextLesson['id'] ?>" class="btn btn-success">
+                                <a href="lesson.php?id=<?= $nextLesson['id'] ?>" class="btn btn-primary btn-sm mt-2 mt-md-0">
                                     Fortsätt lära
                                     <i class="bi bi-arrow-right ms-2"></i>
                                 </a>
@@ -270,9 +284,9 @@ else:
                     <?php endif; ?>
                     
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h1 class="h3 mb-0">Mina kurser</h1>
+                        <h2 class="h2 fs-5 fs-md-3 mb-0">Mina kurser</h2>
                     </div>
-                    <div class="row row-cols-1 row-cols-md-3 g-4">
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mx-2 mx-md-0">
                         <?php 
                         $hasStartedCourses = false;
                         foreach ($groupedLessons as $courseTitle => $courseData): 
@@ -304,7 +318,7 @@ else:
                             }
                         ?>
                         <div class="col">
-                            <div class="card h-100">
+                            <div class="card shadow-sm h-100">
                                 <?php 
                                     // Get first lesson of the course to access course data
                                     $firstLesson = reset($courseLessons);
@@ -312,19 +326,19 @@ else:
                                 ?>
                                 <?php if ($courseImageUrl): ?>
                                     <div class="ratio ratio-16x9">
-                                        <img src="<?= sanitize($courseImageUrl) ?>" class="card-img-top object-fit-cover" alt="<?= sanitize($courseTitle) ?>">
+                                        <img src="<?= sanitize($courseImageUrl) ?>" class="card-img-top object-fit-cover max-height-150 max-height-md-none" alt="<?= sanitize($courseTitle) ?>">
                                     </div>
                                 <?php else: ?>
                                     <div class="ratio ratio-16x9">
-                                        <img src="<?= BASE_PATH_URL ?>/images/placeholder.png" class="card-img-top object-fit-cover" alt="<?= sanitize($courseTitle) ?>">
+                                        <img src="<?= BASE_PATH_URL ?>/images/placeholder.png" class="card-img-top object-fit-cover max-height-150 max-height-md-none" alt="<?= sanitize($courseTitle) ?>">
                                     </div>
                                 <?php endif; ?>
                                 
-                                <div class="card-body">
-                                    <h5 class="card-title"><?= sanitize($courseTitle) ?></h5>
-                                    <div class="d-flex align-items-center mb-3">
+                                <div class="card-body d-flex flex-column px-3 py-3">
+                                    <h5 class="card-title text-truncate"><?= sanitize($courseTitle) ?></h5>
+                                    <div class="d-flex align-items-center my-3">
                                         <div class="progress flex-grow-1" style="height: 8px;">
-                                            <div class="progress-bar bg-success" role="progressbar" 
+                                            <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" 
                                                  style="width: <?= ($courseCompleted / $courseTotal) * 100 ?>%"></div>
                                         </div>
                                         <span class="ms-2 text-muted small"><?= $courseCompleted ?> av <?= $courseTotal ?> lektioner klarade</span>
@@ -335,16 +349,16 @@ else:
                                             Nästa: <?= sanitize($nextLessonInCourse['title']) ?>
                                         </p>
                                     <?php endif; ?>
-                                </div>
-                                
-                                <div class="card-footer bg-white border-top-0">
-                                    <?php if ($nextLessonInCourse): ?>
-                                        <a href="lesson.php?id=<?= $nextLessonInCourse['id'] ?>" class="btn btn-outline-success w-100">
-                                            Fortsätt lära
-                                        </a>
-                                    <?php else: ?>
-                                        <button class="btn btn-outline-success w-100" disabled>Kursen är klar!</button>
-                                    <?php endif; ?>
+                                    
+                                    <div class="mt-auto">
+                                        <?php if ($nextLessonInCourse): ?>
+                                            <a href="lesson.php?id=<?= $nextLessonInCourse['id'] ?>" class="btn btn-primary btn-sm d-block w-100">
+                                                Fortsätt lära
+                                            </a>
+                                        <?php else: ?>
+                                            <button class="btn btn-outline-primary btn-sm d-block w-100" disabled>Kursen är klar!</button>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -352,17 +366,102 @@ else:
                     </div>
                     
                     <?php if (!$hasStartedCourses): ?>
-                        <div class="alert alert-info mt-4">
+                        <div class="alert alert-info mt-4 mx-2 mx-md-0">
                             Du har inte påbörjat några kurser än.
                         </div>
                     <?php endif; ?>
 
-                    <hr class="my-4">
+                    <hr class="my-4 border-light">
+
+                    <?php if (!empty($orgCourses)): ?>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="h2 fs-5 fs-md-3 mb-0">Min organisations kurser</h2>
+                        </div>
+                        
+                        <!-- Search filter -->
+                        <div class="mb-4 mx-2 mx-md-0">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="orgCourseSearch" placeholder="Filtrera kurser...">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mx-2 mx-md-0" id="orgCourseGrid">
+                            <?php foreach ($orgCourses as $course): 
+                                // Get lessons for this course
+                                $courseLessons = query("
+                                    SELECT * FROM " . DB_DATABASE . ".lessons 
+                                    WHERE course_id = ? 
+                                    ORDER BY sort_order
+                                ", [$course['id']]);
+                                
+                                // Check if course is started
+                                $courseStarted = false;
+                                $courseCompleted = 0;
+                                foreach ($courseLessons as $lesson) {
+                                    if (isset($userProgress[$lesson['id']]) && $userProgress[$lesson['id']]['status'] === 'completed') {
+                                        $courseStarted = true;
+                                        $courseCompleted++;
+                                    }
+                                }
+                                
+                                // Skip if already shown in "Mina kurser"
+                                if ($courseStarted) {
+                                    continue;
+                                }
+                            ?>
+                            <div class="col">
+                                <div class="card shadow-sm h-100">
+                                    <?php if ($course['image_url']): ?>
+                                        <div class="ratio ratio-16x9">
+                                            <img src="<?= sanitize($course['image_url']) ?>" class="card-img-top object-fit-cover max-height-150 max-height-md-none" alt="<?= sanitize($course['title']) ?>">
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="ratio ratio-16x9">
+                                            <img src="<?= BASE_PATH_URL ?>/images/placeholder.png" class="card-img-top object-fit-cover max-height-150 max-height-md-none" alt="<?= sanitize($course['title']) ?>">
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <div class="card-body d-flex flex-column px-3 py-3">
+                                        <h5 class="card-title text-truncate"><?= sanitize($course['title']) ?></h5>
+                                        <p class="card-text text-muted small mb-3">
+                                            <?= count($courseLessons) ?> lektioner
+                                        </p>
+                                        <p class="card-text text-muted small">
+                                            Skapad av: <?= sanitize($course['author_email']) ?>
+                                        </p>
+                                        
+                                        <div class="mt-auto">
+                                            <a href="lesson.php?id=<?= $courseLessons[0]['id'] ?>" class="btn btn-outline-primary btn-sm d-block w-100">
+                                                Börja kursen
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        
+                        <hr class="my-4 border-light">
+                    <?php endif; ?>
 
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h1 class="h3 mb-0">Kurser</h1>
+                        <h2 class="h2 fs-5 fs-md-3 mb-0">Kurser</h2>
                     </div>
-                    <div class="row row-cols-1 row-cols-md-3 g-4">
+                    
+                    <!-- Search filter -->
+                    <div class="mb-4 mx-2 mx-md-0">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="courseSearch" placeholder="Filtrera kurser...">
+                            <span class="input-group-text">
+                                <i class="bi bi-search"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mx-2 mx-md-0" id="courseGrid">
                         <?php 
                         $hasUnstartedCourses = false;
                         foreach ($groupedLessons as $courseTitle => $courseData): 
@@ -385,29 +484,29 @@ else:
                             $firstLesson = reset($courseLessons);
                         ?>
                         <div class="col">
-                            <div class="card h-100">
+                            <div class="card shadow-sm h-100">
                                 <?php 
                                     $courseImageUrl = $firstLesson['course_image_url'] ?? null;
                                 ?>
                                 <?php if ($courseImageUrl): ?>
                                     <div class="ratio ratio-16x9">
-                                        <img src="<?= sanitize($courseImageUrl) ?>" class="card-img-top object-fit-cover" alt="<?= sanitize($courseTitle) ?>">
+                                        <img src="<?= sanitize($courseImageUrl) ?>" class="card-img-top object-fit-cover max-height-150 max-height-md-none" alt="<?= sanitize($courseTitle) ?>">
                                     </div>
                                 <?php else: ?>
                                     <div class="ratio ratio-16x9">
-                                        <img src="<?= BASE_PATH_URL ?>/images/placeholder.png" class="card-img-top object-fit-cover" alt="<?= sanitize($courseTitle) ?>">
+                                        <img src="<?= BASE_PATH_URL ?>/images/placeholder.png" class="card-img-top object-fit-cover max-height-150 max-height-md-none" alt="<?= sanitize($courseTitle) ?>">
                                     </div>
                                 <?php endif; ?>
                                 
-                                <div class="card-body">
-                                    <h5 class="card-title"><?= sanitize($courseTitle) ?></h5>
+                                <div class="card-body d-flex flex-column px-3 py-3">
+                                    <h5 class="card-title text-truncate"><?= sanitize($courseTitle) ?></h5>
                                     <p class="card-text text-muted small mb-3">
                                         <?= count($courseLessons) ?> lektioner
                                     </p>
                                 </div>
                                 
                                 <div class="card-footer bg-white border-top-0">
-                                    <a href="lesson.php?id=<?= $firstLesson['id'] ?>" class="btn btn-outline-success w-100">
+                                    <a href="lesson.php?id=<?= $firstLesson['id'] ?>" class="btn btn-outline-success btn-sm w-100">
                                         Börja kursen
                                     </a>
                                 </div>
@@ -417,7 +516,7 @@ else:
                     </div>
                     
                     <?php if (!$hasUnstartedCourses): ?>
-                        <div class="alert alert-info">
+                        <div class="alert alert-info mt-4 mx-2 mx-md-0">
                             Det finns inga fler kurser tillgängliga just nu.
                         </div>
                     <?php endif; ?>
@@ -426,6 +525,64 @@ else:
             <div class="col-lg-2 d-none d-lg-block"></div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Search for all courses
+            const searchInput = document.getElementById('courseSearch');
+            const courseGrid = document.getElementById('courseGrid');
+            const courseCards = courseGrid.getElementsByClassName('col');
+            const noResultsAlert = document.createElement('div');
+            noResultsAlert.className = 'alert alert-info mt-4';
+            noResultsAlert.textContent = 'Inga kurser matchar din sökning.';
+            noResultsAlert.style.display = 'none';
+            courseGrid.parentNode.insertBefore(noResultsAlert, courseGrid.nextSibling);
+
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                let visibleCount = 0;
+
+                Array.from(courseCards).forEach(card => {
+                    const title = card.querySelector('.card-title').textContent.toLowerCase();
+                    const description = card.querySelector('.card-text')?.textContent.toLowerCase() || '';
+                    const matches = title.includes(searchTerm) || description.includes(searchTerm);
+                    
+                    card.style.display = matches ? '' : 'none';
+                    if (matches) visibleCount++;
+                });
+
+                noResultsAlert.style.display = visibleCount === 0 ? '' : 'none';
+            });
+
+            // Search for organization courses
+            const orgSearchInput = document.getElementById('orgCourseSearch');
+            const orgCourseGrid = document.getElementById('orgCourseGrid');
+            if (orgCourseGrid) {
+                const orgCourseCards = orgCourseGrid.getElementsByClassName('col');
+                const orgNoResultsAlert = document.createElement('div');
+                orgNoResultsAlert.className = 'alert alert-info mt-4';
+                orgNoResultsAlert.textContent = 'Inga kurser matchar din sökning.';
+                orgNoResultsAlert.style.display = 'none';
+                orgCourseGrid.parentNode.insertBefore(orgNoResultsAlert, orgCourseGrid.nextSibling);
+
+                orgSearchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    let visibleCount = 0;
+
+                    Array.from(orgCourseCards).forEach(card => {
+                        const title = card.querySelector('.card-title').textContent.toLowerCase();
+                        const description = card.querySelector('.card-text')?.textContent.toLowerCase() || '';
+                        const matches = title.includes(searchTerm) || description.includes(searchTerm);
+                        
+                        card.style.display = matches ? '' : 'none';
+                        if (matches) visibleCount++;
+                    });
+
+                    orgNoResultsAlert.style.display = visibleCount === 0 ? '' : 'none';
+                });
+            }
+        });
+    </script>
 <?php 
     // Inkludera footer
     require_once 'include/footer.php';
