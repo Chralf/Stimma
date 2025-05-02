@@ -97,14 +97,10 @@ try {
     // Skicka förfrågan till OpenAI
     $response = sendOpenAIRequest($messages);
 
-    // Lägg till debugging
-    error_log("AI Response: " . print_r($response, true));
 
     // Formatera svaret med vår egen markdown-parser
     $formattedResponse = parseMarkdown($response);
 
-    // Lägg till debugging
-    error_log("Formatted Response: " . print_r($formattedResponse, true));
 
     // Returnera svaret
     echo json_encode(['response' => $formattedResponse]);

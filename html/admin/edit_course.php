@@ -233,13 +233,6 @@ require_once 'include/header.php';
                                        JOIN " . DB_DATABASE . ".users u ON ce.email COLLATE utf8mb4_swedish_ci = u.email COLLATE utf8mb4_swedish_ci 
                                        WHERE ce.course_id = ?", [$course['id']]);
                     
-                    // Debug information
-                    error_log("Course ID: " . $course['id']);
-                    error_log("Editors count: " . count($editors));
-                    foreach ($editors as $editor) {
-                        error_log("Editor: " . $editor['email'] . " - " . $editor['name']);
-                    }
-                    
                     foreach ($editors as $editor):
                     ?>
                     <div class="d-flex justify-content-between align-items-center mb-2 editor-item" data-email="<?= htmlspecialchars($editor['email']) ?>">
