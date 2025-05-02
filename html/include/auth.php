@@ -127,6 +127,11 @@ function verifyLoginToken($email, $token) {
 function createLoginSession($user) {
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['user_email'] = $user['email'];
+    
+    // Check if user is admin or editor, and set admin_logged_in flag
+    if (isset($user['is_admin']) && $user['is_admin'] == 1 || isset($user['is_editor']) && $user['is_editor'] == 1) {
+        $_SESSION['admin_logged_in'] = true;
+    }
 }
 
 /**

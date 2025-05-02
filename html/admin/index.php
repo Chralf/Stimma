@@ -304,7 +304,6 @@ $values_course_activity = implode(', ', array_column($courseActivity, 'activity_
 
 // Definiera extra JavaScript för Chart.js
 $extra_scripts = <<<EOT
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Aktivitetsgraf

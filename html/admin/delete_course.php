@@ -16,11 +16,21 @@ require_once '../include/database.php';
 require_once '../include/functions.php';
 require_once '../include/auth.php';
 
-// Kontrollera om användaren är inloggad och är admin
+// Kontrollera om användaren är inloggad
 if (!isLoggedIn()) {
-    $_SESSION['message'] = 'Du måste vara inloggad för att se denna sida.';
+    redirect('../index.php');
+    exit;
+}
+
+// Kontrollera om användaren har admin- eller redaktörsrättigheter
+$user = queryOne("SELECT is_admin, is_editor FROM " . DB_DATABASE . ".users WHERE email = ?", [$_SESSION['user_email']]);
+$isAdmin = $user && $user['is_admin'] == 1;
+$isEditor = $user && $user['is_editor'] == 1;
+
+if (!$isAdmin && !$isEditor) {
+    $_SESSION['message'] = 'Du har inte behörighet att radera kurser.';
     $_SESSION['message_type'] = 'warning';
-    header('Location: ../index.php');
+    redirect('../index.php');
     exit;
 }
 
@@ -64,13 +74,12 @@ if ($lessonCount > 0) {
 }
 
 // Kontrollera om användaren har behörighet att radera kursen
-$user = queryOne("SELECT is_admin, is_editor FROM " . DB_DATABASE . ".users WHERE email = ?", [$userEmail]);
-$isAdmin = $user && $user['is_admin'] == 1;
-
+// Om användaren är admin har de behörighet för alla kurser
+// Om användaren är redaktör måste vi kontrollera om de har behörighet för just denna kurs
 if (!$isAdmin) {
     // Kontrollera om användaren är redaktör för denna specifika kurs
-    $isEditor = queryOne("SELECT 1 FROM " . DB_DATABASE . ".course_editors WHERE course_id = ? AND email = ?", [$courseId, $userEmail]);
-    if (!$isEditor) {
+    $isSpecificEditor = queryOne("SELECT 1 FROM " . DB_DATABASE . ".course_editors WHERE course_id = ? AND email = ?", [$courseId, $_SESSION['user_email']]);
+    if (!$isSpecificEditor) {
         $_SESSION['message'] = 'Du har inte behörighet att radera denna kurs.';
         $_SESSION['message_type'] = 'danger';
         header('Location: courses.php');

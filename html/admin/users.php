@@ -16,10 +16,8 @@ require_once '../include/database.php';
 require_once '../include/functions.php';
 require_once '../include/auth.php';
 
-// Kontrollera om användaren är inloggad som admin
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    $_SESSION['flash_message'] = 'Du måste vara inloggad som admin för att se denna sida.';
-    $_SESSION['flash_type'] = 'warning';
+// Kontrollera om användaren är inloggad
+if (!isLoggedIn()) {
     redirect('../index.php');
     exit;
 }

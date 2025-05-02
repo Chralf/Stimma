@@ -11,14 +11,13 @@
 ?>
 
 <?php
-require_once 'include/config.php';
+require_once '../include/config.php';
+require_once '../include/database.php';
+require_once '../include/functions.php';
+require_once '../include/auth.php';
 
-// Check if user is logged in
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-    exit;
-}
+// Include AJAX-compatible authentication check
+require_once 'include/ajax_auth_check.php';
 
 // Verifiera CSRF-token
 if (!isset($_SERVER['HTTP_X_CSRF_TOKEN']) || $_SERVER['HTTP_X_CSRF_TOKEN'] !== $_SESSION['csrf_token']) {

@@ -16,18 +16,11 @@ require_once '../include/database.php';
 require_once '../include/functions.php';
 require_once '../include/auth.php';
 
-// Kontrollera om användaren är inloggad
-if (!isLoggedIn()) {
-    $_SESSION['message'] = 'Du måste vara inloggad för att se denna sida.';
-    $_SESSION['message_type'] = 'warning';
-    header('Location: ../index.php');
-    exit;
-}
+// Include centralized authentication and authorization check
+require_once 'include/auth_check.php';
 
-// Hämta användarens behörigheter
+// Hämta användarens e-post för användning i kursbehörigheter
 $userEmail = $_SESSION['user_email'];
-$user = queryOne("SELECT is_admin, is_editor FROM " . DB_DATABASE . ".users WHERE email = ?", [$userEmail]);
-$isAdmin = $user && $user['is_admin'] == 1;
 
 // Hämta kursdata om vi redigerar en befintlig kurs
 $course = null;

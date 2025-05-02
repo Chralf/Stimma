@@ -16,6 +16,17 @@ require_once '../include/database.php';
 require_once '../include/functions.php';
 require_once '../include/auth.php';
 
+// Include centralized authentication and authorization check
+require_once 'include/auth_check.php';
+
+// Only administrators should be able to access logs
+if (!$isAdmin) {
+    $_SESSION['message'] = 'Du har inte behörighet att se loggar. Endast administratörer har tillgång till den här funktionen.';
+    $_SESSION['message_type'] = 'warning';
+    redirect('index.php');
+    exit;
+}
+
 // Sätt sidtitel
 $page_title = 'Loggar';
 

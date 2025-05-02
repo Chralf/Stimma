@@ -16,6 +16,9 @@ require_once '../include/database.php';
 require_once '../include/functions.php';
 require_once '../include/auth.php';
 
+// Include centralized authentication and authorization check
+require_once 'include/auth_check.php';
+
 // Sätt sidtitel
 $page_title = isset($_GET['id']) ? 'Redigera lektion' : 'Skapa ny lektion';
 

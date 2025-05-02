@@ -14,6 +14,9 @@ require_once '../include/database.php';
 require_once '../include/functions.php';
 require_once '../include/auth.php';
 
+// Include centralized authentication and authorization check
+require_once 'include/auth_check.php';
+
 // Hantera AJAX-anrop separat
 if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest') {
     // Kontrollera att användaren är inloggad

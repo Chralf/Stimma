@@ -4,17 +4,12 @@ require_once '../include/database.php';
 require_once '../../include/functions.php';
 require_once '../../include/auth.php';
 
-header('Content-Type: application/json');
-
 // Aktivera felrapportering för felsökning
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Kontrollera om användaren är inloggad
-if (!isLoggedIn()) {
-    echo json_encode(['success' => false, 'message' => 'Du måste vara inloggad för att utföra denna åtgärd.']);
-    exit;
-}
+// Include AJAX-compatible authentication check
+require_once '../include/ajax_auth_check.php';
 
 // Kontrollera CSRF-token
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {

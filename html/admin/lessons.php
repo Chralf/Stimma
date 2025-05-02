@@ -16,6 +16,9 @@ require_once '../include/database.php';
 require_once '../include/functions.php';
 require_once '../include/auth.php';
 
+// Include centralized authentication and authorization check
+require_once 'include/auth_check.php';
+
 // Kontrollera att course_id finns
 if (!isset($_GET['course_id']) || !is_numeric($_GET['course_id'])) {
     $_SESSION['message'] = "Ingen kurs vald.";

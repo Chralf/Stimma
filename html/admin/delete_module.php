@@ -16,9 +16,20 @@ require_once '../include/database.php';
 require_once '../include/functions.php';
 require_once '../include/auth.php';
 
-// Check if user is logged in
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: login.php');
+// Kontrollera om användaren är inloggad
+if (!isLoggedIn()) {
+    redirect('../index.php');
+    exit;
+}
+
+// Kontrollera om användaren har adminrättigheter (bara admin får hantera moduler)
+$user = queryOne("SELECT is_admin FROM " . DB_DATABASE . ".users WHERE email = ?", [$_SESSION['user_email']]);
+$isAdmin = $user && $user['is_admin'] == 1;
+
+if (!$isAdmin) {
+    $_SESSION['message'] = 'Du har inte behörighet att radera moduler. Endast administratörer får göra detta.';
+    $_SESSION['message_type'] = 'warning';
+    redirect('../index.php');
     exit;
 }
 

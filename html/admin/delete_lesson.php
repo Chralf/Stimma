@@ -16,6 +16,24 @@ require_once '../include/database.php';
 require_once '../include/functions.php';
 require_once '../include/auth.php';
 
+// Kontrollera om användaren är inloggad
+if (!isLoggedIn()) {
+    redirect('../index.php');
+    exit;
+}
+
+// Kontrollera om användaren har admin- eller redaktörsrättigheter
+$user = queryOne("SELECT is_admin, is_editor FROM " . DB_DATABASE . ".users WHERE email = ?", [$_SESSION['user_email']]);
+$isAdmin = $user && $user['is_admin'] == 1;
+$isEditor = $user && $user['is_editor'] == 1;
+
+if (!$isAdmin && !$isEditor) {
+    $_SESSION['message'] = 'Du har inte behörighet att radera lektioner.';
+    $_SESSION['message_type'] = 'warning';
+    redirect('../index.php');
+    exit;
+}
+
 // Kontrollera CSRF-token
 if (!isset($_GET['csrf_token']) || $_GET['csrf_token'] !== $_SESSION['csrf_token']) {
     $_SESSION['message'] = 'Ogiltig CSRF-token.';
@@ -32,8 +50,29 @@ if (!isset($_GET['id'])) {
     exit;
 }
 
-// Hämta lektionsinformation för loggning
+// Hämta lektionsinformation för loggning och behörighetskontroll
 $lesson = queryOne("SELECT * FROM " . DB_DATABASE . ".lessons WHERE id = ?", [$_GET['id']]);
+
+// Kontrollera om lektion finns
+if (!$lesson) {
+    $_SESSION['message'] = 'Lektionen kunde inte hittas.';
+    $_SESSION['message_type'] = 'danger';
+    header('Location: lessons.php');
+    exit;
+}
+
+// Kontrollera behörigheter för redaktörer (admins har redan full behörighet)
+if (!$isAdmin && $isEditor) {
+    // Kontrollera om redaktören har behörighet för denna kurs
+    $isSpecificEditor = queryOne("SELECT 1 FROM " . DB_DATABASE . ".course_editors WHERE course_id = ? AND email = ?", 
+                              [$lesson['course_id'], $_SESSION['user_email']]);
+    if (!$isSpecificEditor) {
+        $_SESSION['message'] = 'Du har inte behörighet att radera lektioner i denna kurs.';
+        $_SESSION['message_type'] = 'danger';
+        header('Location: lessons.php');
+        exit;
+    }
+}
 
 try {
     // Radera lektionen

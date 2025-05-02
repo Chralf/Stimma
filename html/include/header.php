@@ -88,7 +88,7 @@
                     
                     if ($isAdmin || $isCourseEditor): ?>
                         <!-- Admin panel link (hidden on small screens) -->
-                        <a href="/admin/index.php" 
+                        <a href="admin/index.php" 
                            class="btn btn-link p-1 me-2 d-inline-flex align-items-center justify-content-center d-none d-sm-inline-flex" 
                            title="Administrera"
                            aria-label="Administration panel">

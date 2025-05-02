@@ -14,11 +14,8 @@ require_once '../include/database.php';
 require_once '../include/functions.php';
 require_once '../include/auth.php';
 
-// Kontrollera att användaren är inloggad
-if (!isLoggedIn()) {
-    header('Location: login.php');
-    exit;
-}
+// Include centralized authentication and authorization check
+require_once 'include/auth_check.php';
 
 // Kontrollera att ett kurs-ID har skickats med
 if (!isset($_GET['id'])) {

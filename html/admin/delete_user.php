@@ -16,11 +16,20 @@ require_once '../include/database.php';
 require_once '../include/functions.php';
 require_once '../include/auth.php';
 
-// Kontrollera om användaren är inloggad och är admin
+// Kontrollera om användaren är inloggad
 if (!isLoggedIn()) {
-    $_SESSION['message'] = 'Du måste vara inloggad för att se denna sida.';
+    redirect('../index.php');
+    exit;
+}
+
+// Kontrollera om användaren har administratörsrättigheter
+$user = queryOne("SELECT is_admin FROM " . DB_DATABASE . ".users WHERE email = ?", [$_SESSION['user_email']]);
+$isAdmin = $user && $user['is_admin'] == 1;
+
+if (!$isAdmin) {
+    $_SESSION['message'] = 'Du har inte behörighet att radera användare. Endast administratörer får göra detta.';
     $_SESSION['message_type'] = 'warning';
-    header('Location: ../index.php');
+    redirect('../index.php');
     exit;
 }
 

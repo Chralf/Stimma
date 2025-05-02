@@ -12,29 +12,23 @@
 
 <?php
 // Kontrollera att användaren är inloggad
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: login.php');
+if (!isLoggedIn()) {
+    header('Location: ../index.php');
     exit;
 }
 
-// Kontrollera om användaren är admin eller redaktör
+// Hämta användarinformation för att visa admin/redaktör status i menyn
 $user = queryOne("SELECT is_admin, is_editor FROM " . DB_DATABASE . ".users WHERE email = ?", [$_SESSION['user_email']]);
 $isAdmin = $user && $user['is_admin'] == 1;
 $isEditor = $user && $user['is_editor'] == 1;
-
-if (!$isAdmin && !$isEditor) {
-    // Användaren är varken admin eller redaktör - logga ut
-    session_unset();
-    session_destroy();
-    header('Location: login.php?access=denied');
-    exit;
-}
 
 // Enkel session timeout (30 minuter)
 if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 1800)) {
     session_unset();
     session_destroy();
-    header('Location: login.php?timeout=1');
+    $_SESSION['message'] = 'Din session har gått ut på grund av inaktivitet. Var god logga in igen.';
+    $_SESSION['message_type'] = 'warning';
+    header('Location: ../index.php');
     exit;
 }
 

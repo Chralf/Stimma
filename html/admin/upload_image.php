@@ -11,16 +11,13 @@
 ?>
 
 <?php
-session_start();
-require_once 'include/config.php';
-require_once 'include/functions.php';
+require_once '../include/config.php';
+require_once '../include/database.php';
+require_once '../include/functions.php';
+require_once '../include/auth.php';
 
-// Kontrollera om användaren är inloggad och är admin
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'error' => 'Unauthorized']);
-    exit;
-}
+// Include AJAX-compatible authentication check
+require_once 'include/ajax_auth_check.php';
 
 // Kontrollera CSRF-token
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
