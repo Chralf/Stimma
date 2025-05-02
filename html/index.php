@@ -60,9 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 // New user - check domain
                 $domain = substr(strrchr($email, "@"), 1);
-                $allowedDomains = explode(',', getenv('MAIL_ALLOWED_RECIPIENTS'));
                 
-                if (in_array($domain, $allowedDomains)) {
+                if (isDomainAllowed($domain)) {
                     // Create new user with only existing table columns
                     execute("INSERT INTO " . DB_DATABASE . ".users (email, created_at) 
                              VALUES (?, NOW())", 

@@ -106,3 +106,32 @@ if (session_status() === PHP_SESSION_NONE) {
     // Uppdatera senaste aktivitetstidpunkt
     $_SESSION['last_activity'] = time();
 }
+
+// Cache for allowed domains
+$allowedDomainsCache = null;
+
+/**
+ * Check if a domain is allowed
+ * 
+ * @param string $domain The domain to check
+ * @return bool True if domain is allowed, false otherwise
+ */
+function isDomainAllowed($domain) {
+    global $allowedDomainsCache;
+    
+    // Use cached result if available
+    if ($allowedDomainsCache !== null) {
+        return in_array($domain, $allowedDomainsCache);
+    }
+    
+    // Get allowed domains from environment variable
+    $allowedDomainsStr = getenv('MAIL_ALLOWED_RECIPIENTS');
+    if (empty($allowedDomainsStr)) {
+        $allowedDomainsCache = [];
+        return false;
+    }
+    
+    // Parse domains and cache the result
+    $allowedDomainsCache = array_map('trim', explode(',', $allowedDomainsStr));
+    return in_array($domain, $allowedDomainsCache);
+}
