@@ -82,11 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($title)) {
         $error = 'Titel är obligatoriskt.';
     } else {
-        // Debug-utskrift för att se innehållet
-        error_log("Content: " . $content);
-        error_log("AI Instruction: " . $ai_instruction);
-        error_log("AI Prompt: " . $ai_prompt);
-        error_log("Quiz Question: " . $quiz_question);
+
         
         if (isset($_GET['id'])) {
             // Uppdatera befintlig lektion

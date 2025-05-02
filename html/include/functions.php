@@ -311,7 +311,6 @@ function logActivity($email, $message, $context = []) {
                 [$email, $detailedMessage]);
         return true;
     } catch (Exception $e) {
-        error_log("Logging failed: " . $e->getMessage());
         return false;
     }
 }

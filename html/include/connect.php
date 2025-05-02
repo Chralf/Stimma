@@ -44,7 +44,6 @@ try {
     mysqli_set_charset($conn, 'utf8mb4');
 } catch (Exception $e) {
     // Log the full error for server-side debugging
-    error_log('Database Connection Error: ' . $e->getMessage());
     
     // Return a generic error to the client
     http_response_code(500);

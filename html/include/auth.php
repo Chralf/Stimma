@@ -79,9 +79,7 @@ function sendLoginToken($email) {
     // Använd sendSmtpMail från mail.php
     $mailSent = sendSmtpMail($email, $subject, $htmlMessage, $mailFrom, $mailFromName);
     
-    // Logga inloggningsförsöket
-    error_log("Login token generated for: $email - SMTP Mail sent: " . ($mailSent ? 'yes' : 'no'));
-    
+   
     return $mailSent;
 }
 

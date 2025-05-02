@@ -33,7 +33,6 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
     }
     
     if (!$socket) {
-        error_log("SMTP-fel: $errstr ($errno)");
         return false;
     }
     
@@ -42,7 +41,6 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
     $debug[] = "SERVER: $response";
     
     if (substr($response, 0, 3) != '220') {
-        error_log("SMTP-fel: Ogiltig hälsning: $response");
         fclose($socket);
         return false;
     }
@@ -66,7 +64,6 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
         $debug[] = "SERVER: $response";
         
         if (substr($response, 0, 3) != '334') {
-            error_log("SMTP-fel: AUTH accepterades inte: $response");
             fclose($socket);
             return false;
         }
@@ -77,7 +74,6 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
         $debug[] = "SERVER: $response";
         
         if (substr($response, 0, 3) != '334') {
-            error_log("SMTP-fel: Användarnamn accepterades inte: $response");
             fclose($socket);
             return false;
         }
@@ -90,7 +86,6 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
         $debug[] = "SERVER: $response";
         
         if (substr($response, 0, 3) != '235') {
-            error_log("SMTP-fel: Autentisering misslyckades: $response");
             fclose($socket);
             return false;
         }
@@ -102,7 +97,6 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
     $debug[] = "SERVER: $response";
     
     if (substr($response, 0, 3) != '250') {
-        error_log("SMTP-fel: FROM accepterades inte: $response");
         fclose($socket);
         return false;
     }
@@ -113,7 +107,6 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
     $debug[] = "SERVER: $response";
     
     if (substr($response, 0, 3) != '250') {
-        error_log("SMTP-fel: TO accepterades inte: $response");
         fclose($socket);
         return false;
     }
@@ -124,7 +117,6 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
     $debug[] = "SERVER: $response";
     
     if (substr($response, 0, 3) != '354') {
-        error_log("SMTP-fel: DATA accepterades inte: $response");
         fclose($socket);
         return false;
     }
@@ -144,7 +136,6 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
     $debug[] = "SERVER: $response";
     
     if (substr($response, 0, 3) != '250') {
-        error_log("SMTP-fel: Meddelandet accepterades inte: $response");
         fclose($socket);
         return false;
     }
@@ -157,8 +148,6 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
     // Stäng anslutningen
     fclose($socket);
     
-    // Logga felsökningsinformation
-    //error_log("SMTP Debug: " . implode(" | ", $debug));
-    
+
     return true;
 }

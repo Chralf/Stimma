@@ -106,7 +106,6 @@ try {
     echo json_encode(['response' => $formattedResponse]);
 
 } catch (Exception $e) {
-    error_log("AI Chat Error: " . $e->getMessage());
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);
 }

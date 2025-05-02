@@ -59,7 +59,6 @@ function query($sql, $params = []) {
         $stmt->execute($params);
         return $stmt->fetchAll();
     } catch (PDOException $e) {
-        error_log("Query failed: " . $e->getMessage());
         return [];
     }
 }
@@ -79,7 +78,6 @@ function queryOne($sql, $params = []) {
         $result = $stmt->fetch();
         return $result === false ? null : $result;
     } catch (PDOException $e) {
-        error_log("Query failed: " . $e->getMessage());
         return null;
     }
 }
@@ -98,7 +96,6 @@ function execute($sql, $params = []) {
         $stmt->execute($params);
         return $db->lastInsertId();
     } catch (PDOException $e) {
-        error_log("Query failed: " . $e->getMessage());
         return null;
     }
 }

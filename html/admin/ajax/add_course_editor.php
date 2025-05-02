@@ -20,7 +20,6 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_tok
 // Hämta användarens behörigheter
 $userEmail = $_SESSION['user_email'];
 $isAdmin = isAdmin($userEmail);
-error_log("User $userEmail is " . ($isAdmin ? "admin" : "not admin"));
 
 // Validera input
 if (!isset($_POST['course_id']) || !isset($_POST['email'])) {

@@ -48,6 +48,5 @@ try {
     
     echo json_encode(['success' => true]);
 } catch (Exception $e) {
-    error_log("Error removing course editor: " . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'Ett fel uppstod vid borttagning av redaktör.']);
 } 

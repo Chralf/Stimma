@@ -128,7 +128,6 @@ function getNextLesson($pdo, $userId) {
         $stmt->execute([$userId]);
         return $stmt->fetch();
     } catch (PDOException $e) {
-        error_log("Error fetching next lesson: " . $e->getMessage());
         return null;
     }
 }
@@ -145,7 +144,6 @@ function getCompletedLessonsCount($pdo, $userId) {
         $stmt->execute([$userId]);
         return $stmt->fetch()['count'];
     } catch (PDOException $e) {
-        error_log("Error fetching completed lessons count: " . $e->getMessage());
         return 0;
     }
 }
@@ -166,7 +164,6 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null, $
     }
     
     if (!$socket) {
-        error_log("SMTP-fel: $errstr ($errno)");
         return false;
     }
     
@@ -174,7 +171,6 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null, $
     $response = fgets($socket, 515);
     
     if (substr($response, 0, 3) != '220') {
-        error_log("SMTP-fel: Ogiltig hälsning: $response");
         fclose($socket);
         return false;
     }
@@ -195,7 +191,6 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null, $
         $response = fgets($socket, 515);
         
         if (substr($response, 0, 3) != '334') {
-            error_log("SMTP-fel: AUTH accepterades inte: $response");
             fclose($socket);
             return false;
         }
@@ -205,7 +200,6 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null, $
         $response = fgets($socket, 515);
         
         if (substr($response, 0, 3) != '334') {
-            error_log("SMTP-fel: Användarnamn accepterades inte: $response");
             fclose($socket);
             return false;
         }
@@ -215,7 +209,6 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null, $
         $response = fgets($socket, 515);
         
         if (substr($response, 0, 3) != '235') {
-            error_log("SMTP-fel: Autentisering misslyckades: $response");
             fclose($socket);
             return false;
         }
@@ -226,7 +219,6 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null, $
     $response = fgets($socket, 515);
     
     if (substr($response, 0, 3) != '250') {
-        error_log("SMTP-fel: FROM accepterades inte: $response");
         fclose($socket);
         return false;
     }
@@ -236,7 +228,6 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null, $
     $response = fgets($socket, 515);
     
     if (substr($response, 0, 3) != '250') {
-        error_log("SMTP-fel: TO accepterades inte: $response");
         fclose($socket);
         return false;
     }
@@ -246,7 +237,6 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null, $
     $response = fgets($socket, 515);
     
     if (substr($response, 0, 3) != '354') {
-        error_log("SMTP-fel: DATA accepterades inte: $response");
         fclose($socket);
         return false;
     }
@@ -265,7 +255,6 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null, $
     $response = fgets($socket, 515);
     
     if (substr($response, 0, 3) != '250') {
-        error_log("SMTP-fel: Meddelandet accepterades inte: $response");
         fclose($socket);
         return false;
     }
