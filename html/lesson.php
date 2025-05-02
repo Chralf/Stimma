@@ -32,8 +32,6 @@ $systemName = trim(getenv('SYSTEM_NAME'), '"\'') ?: 'AI-kurser';
 
 // Check if user is logged in, redirect if not
 if (!isLoggedIn()) {
-    $_SESSION['flash_message'] = 'Du måste vara inloggad för att se denna sida.';
-    $_SESSION['flash_type'] = 'warning';
     redirect('index.php');
     exit;
 }

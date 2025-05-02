@@ -222,7 +222,8 @@ else:
         if (!isset($groupedLessons[$lesson['course_title']])) {
             $groupedLessons[$lesson['course_title']] = [
                 'lessons' => [],
-                'sort_order' => $lesson['sort_order']
+                'sort_order' => $lesson['sort_order'],
+                'id' => 'course_' . md5($lesson['course_title'] . $lesson['course_id'])
             ];
         }
         $groupedLessons[$lesson['course_title']]['lessons'][] = $lesson;
@@ -254,7 +255,7 @@ else:
     require_once 'include/header.php';
 ?>
     <!-- Main content container -->
-    <div class="container-fluid px-3 px-md-4 py-4">
+    <div class="container px-3 px-md-4 py-4">
         <div class="row">
             <!-- Left sidebar (empty on desktop) -->
             <div class="col-lg-2 d-none d-lg-block"></div>
@@ -350,6 +351,43 @@ else:
                                         </p>
                                     <?php endif; ?>
                                     
+                                    <!-- Accordion for lessons -->
+                                    <div class="accordion accordion-flush mt-2 mb-3" id="courseAccordion<?= $courseData['id'] ?>">
+                                        <div class="accordion-item border-0">
+                                            <h2 class="accordion-header" id="heading<?= $courseData['id'] ?>">
+                                                <button class="accordion-button collapsed p-2 bg-light" type="button" 
+                                                        data-bs-toggle="collapse" data-bs-target="#collapse<?= $courseData['id'] ?>" 
+                                                        aria-expanded="false" aria-controls="collapse<?= $courseData['id'] ?>">
+                                                    Visa lektioner
+                                                </button>
+                                            </h2>
+                                            <div id="collapse<?= $courseData['id'] ?>" class="accordion-collapse collapse" 
+                                                 aria-labelledby="heading<?= $courseData['id'] ?>" data-bs-parent="#courseAccordion<?= $courseData['id'] ?>">
+                                                <div class="accordion-body p-0">
+                                                    <ul class="list-group list-group-flush">
+                                                        <?php foreach ($courseLessons as $index => $lesson): 
+                                                            $isCompleted = isset($userProgress[$lesson['id']]) && $userProgress[$lesson['id']]['status'] === 'completed';
+                                                            $isCurrent = $nextLessonInCourse && $lesson['id'] == $nextLessonInCourse['id'];
+                                                        ?>
+                                                            <li class="list-group-item py-2 px-3 <?= $isCurrent ? 'bg-light' : '' ?>">
+                                                                <a href="lesson.php?id=<?= $lesson['id'] ?>" class="text-decoration-none text-dark d-flex align-items-center">
+                                                                    <?php if ($isCompleted): ?>
+                                                                        <i class="bi bi-check-circle-fill text-success me-2" aria-hidden="true"></i>
+                                                                    <?php elseif ($isCurrent): ?>
+                                                                        <i class="bi bi-arrow-right-circle text-primary me-2" aria-hidden="true"></i>
+                                                                    <?php else: ?>
+                                                                        <i class="bi bi-circle text-muted me-2" aria-hidden="true"></i>
+                                                                    <?php endif; ?>
+                                                                    <span><?= sanitize($lesson['title']) ?></span>
+                                                                </a>
+                                                            </li>
+                                                        <?php endforeach; ?>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
                                     <div class="mt-auto">
                                         <?php if ($nextLessonInCourse): ?>
                                             <a href="lesson.php?id=<?= $nextLessonInCourse['id'] ?>" class="btn btn-primary btn-sm d-block w-100">
@@ -433,6 +471,35 @@ else:
                                             Skapad av: <?= sanitize($course['author_email']) ?>
                                         </p>
                                         
+                                        <!-- Accordion for lessons -->
+                                        <?php $orgCourseId = 'org_course_' . $course['id']; ?>
+                                        <div class="accordion accordion-flush mt-2 mb-3" id="orgCourseAccordion<?= $orgCourseId ?>">
+                                            <div class="accordion-item border-0">
+                                                <h2 class="accordion-header" id="orgHeading<?= $orgCourseId ?>">
+                                                    <button class="accordion-button collapsed p-2 bg-light" type="button" 
+                                                            data-bs-toggle="collapse" data-bs-target="#orgCollapse<?= $orgCourseId ?>" 
+                                                            aria-expanded="false" aria-controls="orgCollapse<?= $orgCourseId ?>">
+                                                        Visa lektioner
+                                                    </button>
+                                                </h2>
+                                                <div id="orgCollapse<?= $orgCourseId ?>" class="accordion-collapse collapse" 
+                                                     aria-labelledby="orgHeading<?= $orgCourseId ?>" data-bs-parent="#orgCourseAccordion<?= $orgCourseId ?>">
+                                                    <div class="accordion-body p-0">
+                                                        <ul class="list-group list-group-flush">
+                                                            <?php foreach ($courseLessons as $index => $lesson): ?>
+                                                                <li class="list-group-item py-2 px-3">
+                                                                    <a href="lesson.php?id=<?= $lesson['id'] ?>" class="text-decoration-none text-dark d-flex align-items-center">
+                                                                        <i class="bi bi-circle text-muted me-2" aria-hidden="true"></i>
+                                                                        <span><?= sanitize($lesson['title']) ?></span>
+                                                                    </a>
+                                                                </li>
+                                                            <?php endforeach; ?>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
                                         <div class="mt-auto">
                                             <a href="lesson.php?id=<?= $courseLessons[0]['id'] ?>" class="btn btn-outline-primary btn-sm d-block w-100">
                                                 Börja kursen
@@ -503,6 +570,35 @@ else:
                                     <p class="card-text text-muted small mb-3">
                                         <?= count($courseLessons) ?> lektioner
                                     </p>
+                                    
+                                    <!-- Accordion for lessons -->
+                                    <?php $newCourseId = 'new_course_' . $firstLesson['course_id']; ?>
+                                    <div class="accordion accordion-flush mt-2 mb-3" id="newCourseAccordion<?= $newCourseId ?>">
+                                        <div class="accordion-item border-0">
+                                            <h2 class="accordion-header" id="newHeading<?= $newCourseId ?>">
+                                                <button class="accordion-button collapsed p-2 bg-light" type="button" 
+                                                        data-bs-toggle="collapse" data-bs-target="#newCollapse<?= $newCourseId ?>" 
+                                                        aria-expanded="false" aria-controls="newCollapse<?= $newCourseId ?>">
+                                                    Visa lektioner
+                                                </button>
+                                            </h2>
+                                            <div id="newCollapse<?= $newCourseId ?>" class="accordion-collapse collapse" 
+                                                 aria-labelledby="newHeading<?= $newCourseId ?>" data-bs-parent="#newCourseAccordion<?= $newCourseId ?>">
+                                                <div class="accordion-body p-0">
+                                                    <ul class="list-group list-group-flush">
+                                                        <?php foreach ($courseLessons as $index => $lesson): ?>
+                                                            <li class="list-group-item py-2 px-3">
+                                                                <a href="lesson.php?id=<?= $lesson['id'] ?>" class="text-decoration-none text-dark d-flex align-items-center">
+                                                                    <i class="bi bi-circle text-muted me-2" aria-hidden="true"></i>
+                                                                    <span><?= sanitize($lesson['title']) ?></span>
+                                                                </a>
+                                                            </li>
+                                                        <?php endforeach; ?>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 
                                 <div class="card-footer bg-white border-top-0">
@@ -528,6 +624,8 @@ else:
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // No custom accordion code needed - using Bootstrap's built-in functionality
+            
             // Search for all courses
             const searchInput = document.getElementById('courseSearch');
             const courseGrid = document.getElementById('courseGrid');

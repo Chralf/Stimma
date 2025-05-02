@@ -52,7 +52,7 @@
 <?php if (isLoggedIn()): ?>
     <!-- Navigation bar for logged-in users with responsive design -->
     <nav class="navbar navbar-expand-sm navbar-light bg-white shadow-sm" role="navigation" aria-label="Main navigation">
-        <div class="container">
+        <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center w-100">
                 <!-- Logo section with link to homepage -->
                 <h1 class="h3 mb-0">
@@ -92,7 +92,7 @@
                            class="btn btn-link p-1 me-2 d-inline-flex align-items-center justify-content-center d-none d-sm-inline-flex" 
                            title="Administrera"
                            aria-label="Administration panel">
-                            <i class="bi bi-gear" aria-hidden="true"></i>
+                            <i class="bi bi-gear text-dark" aria-hidden="true"></i>
                         </a>
                     <?php endif; ?>
                     <!-- Logout button -->
@@ -100,7 +100,7 @@
                        class="btn btn-link p-1 d-inline-flex align-items-center justify-content-center" 
                        title="Logga ut"
                        aria-label="Log out">
-                        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+                        <i class="bi bi-box-arrow-right text-dark" aria-hidden="true"></i>
                     </a>
                 </div>
             </div>
