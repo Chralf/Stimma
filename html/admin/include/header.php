@@ -56,7 +56,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Admin - <?= $page_title ?? 'Administration' ?></title>
-    <link rel="mask-icon" href="<?= BASE_PATH_URL ?>/images/safari-pinned-tab.svg" color="#007bff">
+    <link rel="mask-icon" href="images/safari-pinned-tab.svg" color="#007bff">
     <meta name="msapplication-TileColor" content="#007bff">
     <meta name="theme-color" content="#007bff">
     
@@ -69,16 +69,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <!-- Chart.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
     
-    <!-- jQuery -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    
-    <!-- jQuery UI -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
-    
-    
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<?= BASE_PATH_URL ?>/include/css/style.css">
+    <link rel="stylesheet" href="include/css/style.css">
     
     <!-- CSRF Token för AJAX-anrop -->
     <script>
@@ -130,7 +122,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     </div>
                 </li>
                 <li class="nav-item">
-                    <a href="<?= BASE_PATH_URL ?>/logout.php" class="nav-link text-white px-3 py-2 d-flex align-items-center mb-3">
+                    <a href="logout.php" class="nav-link text-white px-3 py-2 d-flex align-items-center mb-3">
                         <i class="bi bi-box-arrow-right me-2"></i> Logga ut
                     </a>
                 </li>

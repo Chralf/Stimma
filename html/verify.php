@@ -25,10 +25,10 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Include required configuration and function files
-require_once __DIR__ . '/include/config.php';
-require_once __DIR__ . '/include/database.php';
-require_once __DIR__ . '/include/functions.php';
-require_once __DIR__ . '/include/auth.php';
+require_once 'include/config.php';
+require_once 'include/database.php';
+require_once 'include/functions.php';
+require_once 'include/auth.php';
 
 // Get system name from environment variable or use default
 $systemName = trim(getenv('SYSTEM_NAME'), '"\'') ?: 'Stimma';

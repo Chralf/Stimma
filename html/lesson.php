@@ -22,10 +22,10 @@
  */
 
 // Include required configuration and function files
-require_once __DIR__ . '/include/config.php';
-require_once __DIR__ . '/include/database.php';
-require_once __DIR__ . '/include/functions.php';
-require_once __DIR__ . '/include/auth.php';
+require_once 'include/config.php';
+require_once 'include/database.php';
+require_once 'include/functions.php';
+require_once 'include/auth.php';
 
 // Get system name from environment variable with fallback
 $systemName = trim(getenv('SYSTEM_NAME'), '"\'') ?: 'AI-kurser';
@@ -275,7 +275,7 @@ function convertYoutubeUrl($url) {
                             <?php if (!empty($lesson['image_url'])): ?>
                             <div class="col-md-4">
                                 <div class="mb-3 mb-md-0">
-                                    <img src="<?= BASE_PATH_URL . sanitize($lesson['image_url']) ?>" alt="<?= sanitize($lesson['title']) ?>" class="img-fluid rounded">
+                                    <img src="<?= sanitize($lesson['image_url']) ?>" alt="<?= sanitize($lesson['title']) ?>" class="img-fluid rounded">
                                 </div>
                             </div>
                             <?php endif; ?>

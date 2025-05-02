@@ -1,8 +1,8 @@
 <?php
-require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/database.php';
-require_once __DIR__ . '/functions.php';
-require_once __DIR__ . '/mail.php';
+require_once 'config.php';
+require_once 'database.php';
+require_once 'functions.php';
+require_once 'mail.php';
 
 /**
  * Kontrollera om användaren är inloggad
@@ -34,7 +34,7 @@ function sendLoginToken($email) {
              [$token, $email]);
     
     // Skapa inloggningslänk med fullständig URL och e-post
-    $loginUrl = 'https://' . $_SERVER['HTTP_HOST'] . BASE_PATH_URL . '/verify.php?token=' . $token . '&email=' . urlencode($email);
+    $loginUrl = 'https://' . $_SERVER['HTTP_HOST'] . 'verify.php?token=' . $token . '&email=' . urlencode($email);
     
     // Hämta systemnamn från .env
     $systemName = trim(getenv('SYSTEM_NAME'), '"\'') ?: 'AI-kurser';

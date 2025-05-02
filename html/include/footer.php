@@ -1,6 +1,6 @@
 <!-- Ladda JS-bibliotek -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-<script src="<?= BASE_PATH_URL ?>/include/js/stimma-confetti.js"></script>
+<script src="include/js/stimma-confetti.js"></script>
 
 
         <div class="container-fluid footer text-center">

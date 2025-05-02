@@ -12,8 +12,8 @@
 
 <?php
 session_start();
-require_once '../include/config.php';
-require_once '../include/functions.php';
+require_once 'include/config.php';
+require_once 'include/functions.php';
 
 // Kontrollera om användaren är inloggad och är admin
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {

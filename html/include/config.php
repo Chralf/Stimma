@@ -9,8 +9,15 @@ if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
 
 // Load environment variables from .env file
 function loadEnv($path) {
+    // First try the provided path
     if (!file_exists($path)) {
-        throw new Exception(".env file not found");
+        // If not found, try parent directory
+        $parentPath = dirname(dirname($_SERVER['SCRIPT_FILENAME'])) . '/' . basename($path);
+        if (file_exists($parentPath)) {
+            $path = $parentPath;
+        } else {
+            throw new Exception(".env file not found in either current or parent directory");
+        }
     }
     
     $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -32,15 +39,9 @@ function loadEnv($path) {
     }
 }
 
-// Define base path
-define('BASE_PATH', dirname(__DIR__));
-
-// Definiera bas-URL för länkar och bilder - enkel lösning för undermappar
-$scriptDir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
-define('BASE_PATH_URL', $scriptDir);
 
 // Load environment variables
-loadEnv(BASE_PATH . '/.env');
+loadEnv('.env');
 
 // Database configuration
 define('DB_CONNECTION', getenv('DB_CONNECTION'));

@@ -21,10 +21,10 @@
  */
 
 // Include required configuration and function files
-require_once __DIR__ . '/include/config.php';
-require_once __DIR__ . '/include/database.php';
-require_once __DIR__ . '/include/functions.php';
-require_once __DIR__ . '/include/auth.php';
+require_once 'include/config.php';
+require_once 'include/database.php';
+require_once 'include/functions.php';
+require_once 'include/auth.php';
 
 // Get system configuration from environment variables with fallbacks
 $systemName = trim(getenv('SYSTEM_NAME'), '"\'') ?: 'Stimma';
@@ -105,7 +105,7 @@ if (!$isLoggedIn):
                 <div class="card shadow-sm">
                     <div class="card-body text-center p-4">
                         <!-- Logo and system description -->
-                        <h1 class="display-4 mb-3"><img src="<?= BASE_PATH_URL ?>/images/logo.png" height="50px" alt="<?= $systemName ?>"></h1>
+                        <h1 class="display-4 mb-3"><img src="images/logo.png" height="50px" alt="<?= $systemName ?>"></h1>
                         <?php if ($systemDescription): ?>
                             <p class="lead text-muted mb-4"><?= $systemDescription ?></p>
                         <?php endif; ?>
@@ -330,7 +330,7 @@ else:
                                     </div>
                                 <?php else: ?>
                                     <div class="ratio ratio-16x9">
-                                        <img src="<?= BASE_PATH_URL ?>/images/placeholder.png" class="card-img-top object-fit-cover max-height-150 max-height-md-none" alt="<?= sanitize($courseTitle) ?>">
+                                        <img src="images/placeholder.png" class="card-img-top object-fit-cover max-height-150 max-height-md-none" alt="<?= sanitize($courseTitle) ?>">
                                     </div>
                                 <?php endif; ?>
                                 
@@ -420,7 +420,7 @@ else:
                                         </div>
                                     <?php else: ?>
                                         <div class="ratio ratio-16x9">
-                                            <img src="<?= BASE_PATH_URL ?>/images/placeholder.png" class="card-img-top object-fit-cover max-height-150 max-height-md-none" alt="<?= sanitize($course['title']) ?>">
+                                            <img src="images/placeholder.png" class="card-img-top object-fit-cover max-height-150 max-height-md-none" alt="<?= sanitize($course['title']) ?>">
                                         </div>
                                     <?php endif; ?>
                                     
@@ -494,7 +494,7 @@ else:
                                     </div>
                                 <?php else: ?>
                                     <div class="ratio ratio-16x9">
-                                        <img src="<?= BASE_PATH_URL ?>/images/placeholder.png" class="card-img-top object-fit-cover max-height-150 max-height-md-none" alt="<?= sanitize($courseTitle) ?>">
+                                        <img src="images/placeholder.png" class="card-img-top object-fit-cover max-height-150 max-height-md-none" alt="<?= sanitize($courseTitle) ?>">
                                     </div>
                                 <?php endif; ?>
                                 

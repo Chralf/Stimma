@@ -20,7 +20,7 @@
  * Required variables:
  * - $page_title: Page specific title
  * - SITE_NAME: Global site name constant
- * - BASE_PATH_URL: Base URL for the application
+
  */
 
 // Start of HTML document with Swedish language setting
@@ -45,7 +45,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js" defer></script>
     
     <!-- Custom CSS for site-specific styles -->
-    <link href="<?= htmlspecialchars(BASE_PATH_URL) ?>/include/css/style.css" rel="stylesheet">
+    <link href="include/css/style.css" rel="stylesheet">
 </head>
 <body>
 
@@ -56,8 +56,8 @@
             <div class="d-flex justify-content-between align-items-center w-100">
                 <!-- Logo section with link to homepage -->
                 <h1 class="h3 mb-0">
-                    <a href="<?= htmlspecialchars(BASE_PATH_URL) ?>/" aria-label="Go to homepage">
-                        <img src="<?= htmlspecialchars(BASE_PATH_URL) ?>/images/logo.png" height="50px" alt="<?= htmlspecialchars(SITE_NAME) ?>">
+                    <a href="index.php" aria-label="Hem">
+                        <img src="images/logo.png" height="50px" alt="<?= htmlspecialchars(SITE_NAME) ?>">
                     </a>
                 </h1>
                 
@@ -88,7 +88,7 @@
                     
                     if ($isAdmin || $isCourseEditor): ?>
                         <!-- Admin panel link (hidden on small screens) -->
-                        <a href="<?= htmlspecialchars(BASE_PATH_URL) ?>/admin/index.php" 
+                        <a href="/admin/index.php" 
                            class="btn btn-link p-1 me-2 d-inline-flex align-items-center justify-content-center d-none d-sm-inline-flex" 
                            title="Administrera"
                            aria-label="Administration panel">

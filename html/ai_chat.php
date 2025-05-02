@@ -13,10 +13,10 @@
 
 <?php
 
-require_once __DIR__ . '/include/config.php';
-require_once __DIR__ . '/include/database.php';
-require_once __DIR__ . '/include/functions.php';
-require_once __DIR__ . '/include/auth.php';
+require_once 'include/config.php';
+require_once 'include/database.php';
+require_once 'include/functions.php';
+require_once 'include/auth.php';
 
 // Sätt header för JSON
 header('Content-Type: application/json');
