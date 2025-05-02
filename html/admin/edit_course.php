@@ -80,11 +80,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $targetPath = $uploadDir . $fileName;
                 
                 if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
-                    $imageUrl = '/upload/' . $fileName;
+                    $imageUrl = $fileName;
                     
                     // Ta bort gammal bild om den finns
                     if (isset($course['image_url']) && $course['image_url'] !== $imageUrl) {
-                        $oldImagePath = __DIR__ . '/..' . $course['image_url'];
+                        $oldImagePath = __DIR__ . '../upload/' . $course['image_url'];
                         if (file_exists($oldImagePath)) {
                             unlink($oldImagePath);
                         }
@@ -184,7 +184,7 @@ require_once 'include/header.php';
                             <?php if (!empty($course['image_url'])): ?>
                                 <div class="mb-2">
                                     <p class="text-muted">Nuvarande bild:</p>
-                                    <img src="../<?= htmlspecialchars($course['image_url']) ?>" alt="Kursbild" class="img-thumbnail" style="max-width: 200px;">
+                                    <img src="../upload/<?= htmlspecialchars($course['image_url']) ?>" alt="Kursbild" class="img-thumbnail" style="max-width: 200px;">
                                     <input type="hidden" name="image_url" value="<?= htmlspecialchars($course['image_url']) ?>">
                                     <div class="form-text">Sökväg: <?= htmlspecialchars($course['image_url']) ?></div>
                                 </div>

@@ -326,7 +326,7 @@ else:
                                 ?>
                                 <?php if ($courseImageUrl): ?>
                                     <div class="ratio ratio-16x9">
-                                        <img src="<?= sanitize($courseImageUrl) ?>" class="card-img-top object-fit-cover max-height-150 max-height-md-none" alt="<?= sanitize($courseTitle) ?>">
+                                        <img src="upload/<?= sanitize($courseImageUrl) ?>" class="card-img-top object-fit-cover max-height-150 max-height-md-none" alt="<?= sanitize($courseTitle) ?>">
                                     </div>
                                 <?php else: ?>
                                     <div class="ratio ratio-16x9">
@@ -453,7 +453,7 @@ else:
                                 <div class="card shadow-sm h-100">
                                     <?php if ($course['image_url']): ?>
                                         <div class="ratio ratio-16x9">
-                                            <img src="<?= sanitize($course['image_url']) ?>" class="card-img-top object-fit-cover max-height-150 max-height-md-none" alt="<?= sanitize($course['title']) ?>">
+                                            <img src="upload/<?= sanitize($course['image_url']) ?>" class="card-img-top object-fit-cover max-height-150 max-height-md-none" alt="<?= sanitize($course['title']) ?>">
                                         </div>
                                     <?php else: ?>
                                         <div class="ratio ratio-16x9">
@@ -556,7 +556,7 @@ else:
                                 ?>
                                 <?php if ($courseImageUrl): ?>
                                     <div class="ratio ratio-16x9">
-                                        <img src="<?= sanitize($courseImageUrl) ?>" class="card-img-top object-fit-cover max-height-150 max-height-md-none" alt="<?= sanitize($courseTitle) ?>">
+                                        <img src="upload/<?= sanitize($courseImageUrl) ?>" class="card-img-top object-fit-cover max-height-150 max-height-md-none" alt="<?= sanitize($courseTitle) ?>">
                                     </div>
                                 <?php else: ?>
                                     <div class="ratio ratio-16x9">
@@ -611,7 +611,7 @@ else:
                     </div>
                     
                     <?php if (!$hasUnstartedCourses): ?>
-                        <div class="alert alert-info mt-4 mx-2 mx-md-0">
+                        <div class="alert alert-secondary mt-4 mx-2 mx-md-0">
                             Det finns inga fler kurser tillgängliga just nu.
                         </div>
                     <?php endif; ?>

@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $targetPath = $uploadDir . $fileName;
             
             if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
-                $image_url = '/upload/' . $fileName;
+                $image_url = $fileName;
             } else {
                 $error = 'Kunde inte ladda upp bilden.';
             }
@@ -258,7 +258,7 @@ $courses = queryAll("SELECT * FROM " . DB_DATABASE . ".courses ORDER BY sort_ord
                             <?php if (!empty($imageUrl)): ?>
                                 <div class="mb-2">
                                     <p class="text-muted">Nuvarande bild:</p>
-                                    <img src="<?= htmlspecialchars($imageUrl) ?>" alt="Lektionsbild" class="img-thumbnail" style="max-width: 200px;">
+                                    <img src="../upload/<?= htmlspecialchars($imageUrl) ?>" alt="Lektionsbild" class="img-thumbnail" style="max-width: 200px;">
                                     <input type="hidden" name="image_url" value="<?= htmlspecialchars($imageUrl) ?>">
                                     <div class="form-text">Sökväg: <?= htmlspecialchars($imageUrl) ?></div>
                                 </div>

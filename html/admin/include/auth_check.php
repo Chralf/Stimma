@@ -19,8 +19,7 @@ $isEditor = $user && $user['is_editor'] == 1;
 
 // Kontrollera om användaren har admin- eller redaktörsrättigheter
 if (!$isAdmin && !$isEditor) {
-    $_SESSION['message'] = 'Du har inte behörighet att komma åt admin-sektionen.';
-    $_SESSION['message_type'] = 'warning';
+
     redirect('../index.php');
     exit;
 }

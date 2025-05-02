@@ -273,7 +273,7 @@ function convertYoutubeUrl($url) {
                             <?php if (!empty($lesson['image_url'])): ?>
                             <div class="col-md-4">
                                 <div class="mb-3 mb-md-0">
-                                    <img src="<?= sanitize($lesson['image_url']) ?>" alt="<?= sanitize($lesson['title']) ?>" class="img-fluid rounded">
+                                    <img src="upload/<?= sanitize($lesson['image_url']) ?>" alt="<?= sanitize($lesson['title']) ?>" class="img-fluid rounded">
                                 </div>
                             </div>
                             <?php endif; ?>

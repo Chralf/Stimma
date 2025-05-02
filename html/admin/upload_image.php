@@ -99,9 +99,8 @@ if (move_uploaded_file($file['tmp_name'], $targetPath)) {
     // Logga uppladdningen
     logActivity($_SESSION['user_email'], "Laddade upp bild: " . $filename);
     
-    $relativeUrl = '/upload/' . $filename;
     header('Content-Type: application/json');
-    echo json_encode(['success' => true, 'url' => $relativeUrl]);
+    echo json_encode(['success' => true, 'url' => $filename]);
 } else {
     header('Content-Type: application/json');
     echo json_encode(['success' => false, 'error' => 'Kunde inte spara filen']);
