@@ -8,16 +8,24 @@ if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
 }
 
 // Load environment variables from .env file
-function loadEnv($path) {
-    // First try the provided path
-    if (!file_exists($path)) {
-        // If not found, try parent directory
-        $parentPath = dirname(dirname($_SERVER['SCRIPT_FILENAME'])) . '/' . basename($path);
-        if (file_exists($parentPath)) {
-            $path = $parentPath;
-        } else {
-            throw new Exception(".env file not found in either current or parent directory");
-        }
+function loadEnv($path = '.env') {
+    // We'll search the directory tree upward for the .env file
+    $currentDir = dirname($_SERVER['SCRIPT_FILENAME']);
+    $rootDir = $_SERVER['DOCUMENT_ROOT'] ?: dirname(dirname(dirname($currentDir))); // Set a limit to stop at website root
+    
+    $envPath = $currentDir . '/' . $path;
+    
+    // Keep going up directories until we find the file or reach the root directory
+    while (!file_exists($envPath) && $currentDir !== $rootDir && $currentDir !== dirname($currentDir)) {
+        $currentDir = dirname($currentDir);
+        $envPath = $currentDir . '/' . $path;
+    }
+    
+    // If we found the .env file, use it; otherwise, throw an exception
+    if (file_exists($envPath)) {
+        $path = $envPath;
+    } else {
+        throw new Exception(".env file not found in any parent directory up to the root");
     }
     
     $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
