@@ -62,15 +62,28 @@ if (!$userExists) {
 
 // Lägg till redaktör
 try {
-    $sql = "INSERT INTO " . DB_DATABASE . ".course_editors (course_id, email, created_by) VALUES (?, ?, ?)";
+    // Starta transaktion för att säkerställa att båda uppdateringarna genomförs eller ingen
+    execute("START TRANSACTION");
     
-    $result = execute($sql, [$courseId, $newEditorEmail, $userEmail]);
+    // Lägg till i course_editors-tabellen
+    $sql1 = "INSERT INTO " . DB_DATABASE . ".course_editors (course_id, email, created_by) VALUES (?, ?, ?)";
+    $result1 = execute($sql1, [$courseId, $newEditorEmail, $userEmail]);
     
-    if ($result) {
+    // Uppdatera is_editor i users-tabellen om den inte redan är satt till 1
+    $sql2 = "UPDATE " . DB_DATABASE . ".users SET is_editor = 1 WHERE email = ? AND (is_editor = 0 OR is_editor IS NULL)";
+    $result2 = execute($sql2, [$newEditorEmail]);
+    
+    if ($result1) {
+        // Bekräfta transaktion
+        execute("COMMIT");
         echo json_encode(['success' => true]);
     } else {
+        // Återställ transaktion vid fel
+        execute("ROLLBACK");
         echo json_encode(['success' => false, 'message' => 'Kunde inte lägga till redaktören.']);
     }
 } catch (Exception $e) {
+    // Återställ transaktion vid fel och visa felmeddelande
+    execute("ROLLBACK");
     echo json_encode(['success' => false, 'message' => 'Ett fel uppstod när redaktören skulle läggas till.']);
 } 

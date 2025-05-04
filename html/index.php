@@ -268,7 +268,7 @@ else:
                             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
                                 <div class="me-md-3">
                                     <span class="badge bg-secondary mb-2">Nästa lektion</span>
-                                    <h2 class="card-title fs-5 text-truncate"><?= sanitize($nextLesson['title']) ?></h2>
+                                    <h2 class="card-title fs-5"><?= sanitize($nextLesson['title']) ?></h2>
                                     <p class="text-muted small mb-2">Kurs: <?= sanitize($nextCourse) ?></p>
                                     <?php if (!empty($nextLesson['description'])): ?>
                                         <p class="card-text small"><?= sanitize($nextLesson['description']) ?></p>
