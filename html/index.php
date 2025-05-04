@@ -254,7 +254,7 @@ else:
     require_once 'include/header.php';
 ?>
     <!-- Main content container -->
-    <div class="container px-3 px-md-4 py-4">
+    <div class="container-fluid px-3 px-md-4 py-4 px-md-5">
         <div class="row">
             <!-- Left sidebar (empty on desktop) -->
             <div class="col-lg-2 d-none d-lg-block"></div>
