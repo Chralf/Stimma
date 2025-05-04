@@ -93,7 +93,7 @@ $isLoggedIn = isLoggedIn();
 // If not logged in - show email form
 if (!$isLoggedIn): 
     // Set page title
-    $page_title = $systemName . ' - Digitala verktyg för lärare';
+    $page_title = $systemName . ' - Digitala verktyg för lärande';
     // Include header
     require_once 'include/header.php';
 ?>
@@ -249,7 +249,7 @@ else:
     }
 
     // Set page title
-    $page_title = $systemName . ' - Digitala verktyg för lärare';
+    $page_title = $systemName . ' - Digitala verktyg för lärande';
     // Include header
     require_once 'include/header.php';
 ?>

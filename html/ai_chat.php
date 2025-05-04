@@ -80,7 +80,7 @@ try {
 
     // Skapa systemprompt med lektionskontext
     $systemPrompt = "Du är en hjälpsam AI-assistent som hjälper användaren med lektionen '{$lesson['title']}'. ";
-    $systemPrompt .= "Användaren är en lärare som vill lära sig mer om ämnet. ";
+    $systemPrompt .= "Användaren är en person som vill lära sig mer om ämnet. ";
     $systemPrompt .= "Var vänlig och pedagogisk i dina svar. Svara alltid på svenska om användare inte ber om annat språk.";
 
     // Lägg till AI-prompt om den finns
