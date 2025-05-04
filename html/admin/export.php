@@ -64,7 +64,7 @@ $exportData = [
         'duration_minutes' => $course['duration_minutes'],
         'prerequisites' => $course['prerequisites'],
         'tags' => $course['tags'],
-        'image_url' => $course['image_url'],
+        'image_url' => '', // Exkludera bild-URL vid export
         'status' => 'inactive', // Sätt alltid till inaktiv vid export
         'sort_order' => $course['sort_order'],
         'featured' => $course['featured'],
@@ -79,7 +79,7 @@ foreach ($lessons as $lesson) {
     $exportData['lessons'][] = [
         'title' => $lesson['title'],
         'estimated_duration' => $lesson['estimated_duration'],
-        'image_url' => $lesson['image_url'],
+        'image_url' => '', // Exkludera bild-URL vid export
         'video_url' => $lesson['video_url'],
         'content' => $lesson['content'],
         'resource_links' => $lesson['resource_links'],
