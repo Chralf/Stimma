@@ -45,31 +45,39 @@ function sendLoginToken($email) {
     $subject = mb_encode_mimeheader("Inloggningslänk till " . $systemName, 'UTF-8', 'Q');
     
     $htmlMessage = "
-        <html>
-        <head>
-            <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; }
-                .button { 
-                    display: inline-block; 
-                    padding: 10px 20px; 
-                    background-color: #0d6efd; 
-                    color: white; 
-                    text-decoration: none; 
-                    border-radius: 5px; 
-                    margin: 20px 0;
-                }
-            </style>
-        </head>
-        <body>
-            <h2>Inloggningslänk till " . $systemName . "</h2>
-            <p>Klicka på knappen nedan för att logga in:</p>
-            <a href='" . $loginUrl . "' class='button'>Logga in</a>
-            <p>Om knappen inte fungerar, kopiera denna länk och klistra in i din webbläsare:</p>
-            <p>" . $loginUrl . "</p>
-            <p>Länken är giltig i {$tokenExpiryMinutes} minuter.</p>
-            <p>Om du inte har begärt denna länk kan du ignorera detta meddelande.</p>
-        </body>
-        </html>
+    <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
+    <html xmlns=\"http://www.w3.org/1999/xhtml\">
+    <head>
+        <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />
+        <title>Inloggningslänk</title>
+    </head>
+    <body style=\"font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0;\">
+        <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\" style=\"margin: 0; padding: 0;\">
+            <tr>
+                <td style=\"padding: 20px;\">
+                    <h2 style=\"font-family: Arial, sans-serif; color: #000000;\">Inloggningslänk till " . $systemName . "</h2>
+                    <p style=\"font-family: Arial, sans-serif; color: #000000;\">Klicka på knappen nedan för att logga in:</p>
+                    
+                    <!--[if mso]>
+                    <v:roundrect xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:w=\"urn:schemas-microsoft-com:office:word\" href='" . $loginUrl . "' style=\"height:40px;v-text-anchor:middle;width:120px;\" arcsize=\"10%\" stroke=\"f\" fillcolor=\"#0d6efd\">
+                    <w:anchorlock/>
+                    <center>
+                    <![endif]-->
+                    <a href='" . $loginUrl . "' style=\"background-color: #0d6efd; border-radius: 5px; color: #ffffff; display: inline-block; font-family: Arial, sans-serif; font-size: 16px; line-height: 40px; text-align: center; text-decoration: none; width: 120px; -webkit-text-size-adjust: none;\">Logga in</a>
+                    <!--[if mso]>
+                    </center>
+                    </v:roundrect>
+                    <![endif]-->
+                    
+                    <p style=\"font-family: Arial, sans-serif; color: #000000; margin-top: 20px;\">Om knappen inte fungerar, kopiera denna länk och klistra in i din webbläsare:</p>
+                    <p style=\"font-family: Arial, sans-serif; color: #000000;\">" . $loginUrl . "</p>
+                    <p style=\"font-family: Arial, sans-serif; color: #000000;\">Länken är giltig i {$tokenExpiryMinutes} minuter.</p>
+                    <p style=\"font-family: Arial, sans-serif; color: #000000;\">Om du inte har begärt denna länk kan du ignorera detta meddelande.</p>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
     ";
     
     // Använd SMTP-funktionen från mail.php
