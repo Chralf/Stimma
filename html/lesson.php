@@ -308,6 +308,7 @@ function convertYoutubeUrl($url) {
                 <?php endif; ?>
                 
                 <!-- AI chat interface card -->
+                <?php if (!empty($lesson['ai_instruction'])): ?>
                 <div class="card mb-4">
                     <div class="card-header d-flex align-items-center" id="aiChatToggle">
                         <i class="bi bi-robot me-2"></i> Fråga AI om detta ämne
@@ -316,11 +317,7 @@ function convertYoutubeUrl($url) {
                         <div class="mb-3" id="aiMessages">
                             <div class="alert alert-info">
                                 <div>
-                                    <?php if (!empty($lesson['ai_instruction'])): ?>
-                                        <?= cleanHtml($lesson['ai_instruction']) ?>
-                                    <?php else: ?>
-                                        Hej! Jag är din AI-assistent. Ställ gärna frågor om "<?= sanitize($lesson['title']) ?>" så hjälper jag dig.
-                                    <?php endif; ?>
+                                    <?= cleanHtml($lesson['ai_instruction']) ?>
                                 </div>
                             </div>
                         </div>
@@ -336,6 +333,7 @@ function convertYoutubeUrl($url) {
                         </div>
                     </div>
                 </div>
+                <?php endif; ?>
                 
                 <!-- Quiz-sektion -->
                 <div class="card">

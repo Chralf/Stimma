@@ -152,6 +152,7 @@ $status = 'active';
 $id = null;
 $courseId = null;
 $imageUrl = '';
+$videoUrl = '';
 $aiInstruction = '';
 $aiPrompt = '';
 $quizQuestion = '';
@@ -171,6 +172,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
         $status = $lesson['status'] ?? 'active';
         $courseId = $lesson['course_id'] ?? null;
         $imageUrl = $lesson['image_url'] ?? '';
+        $videoUrl = $lesson['video_url'] ?? '';
         $aiInstruction = $lesson['ai_instruction'] ?? '';
         $aiPrompt = $lesson['ai_prompt'] ?? '';
         $quizQuestion = $lesson['quiz_question'] ?? '';
@@ -249,12 +251,12 @@ $courses = queryAll("SELECT * FROM " . DB_DATABASE . ".courses ORDER BY sort_ord
                         </div>
 
                         <div class="mb-3">
-                            <label for="content" class="form-label">Innehåll</label>
+                            <label for="content" class="form-label fw-normal">Innehåll</label>
                             <?php require_once 'include/editor.php'; renderEditor($content ?? '', 'content', 'contentEditor'); ?>
                         </div>
 
                         <div class="mb-3">
-                            <label for="image" class="form-label">Bild</label>
+                            <label for="image" class="form-label fw-normal">Bild</label>
                             <?php if (!empty($imageUrl)): ?>
                                 <div class="mb-2">
                                     <p class="text-muted">Nuvarande bild:</p>
@@ -271,28 +273,27 @@ $courses = queryAll("SELECT * FROM " . DB_DATABASE . ".courses ORDER BY sort_ord
                         <div class="mb-3">
                             <div class="form-floating">
                                 <input type="url" class="form-control" id="video_url" name="video_url" 
-                                       value="<?= htmlspecialchars($lesson['video_url'] ?? '') ?>"
-                                       placeholder="https://www.youtube.com/watch?v=...">
+                                       value="<?= htmlspecialchars($videoUrl ?? '') ?>">
                                 <label for="video_url">YouTube-länk</label>
                             </div>
                             <div class="form-text">Klistra in en YouTube-länk (t.ex. https://www.youtube.com/watch?v=...) eller en embed-länk</div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="ai_instruction" class="form-label">AI Instruktion <div class="form-text">Instruktioner som visas för användaren i AI-chatten.</div></label>
+                            <label for="ai_instruction" class="form-label fw-normal">AI Instruktion<br><span class="form-text fw-normal">Instruktioner som visas för användaren i AI-chatten.</span></label>
                             <?php require_once 'include/editor.php'; renderEditor($aiInstruction ?? '', 'ai_instruction', 'aiInstructionEditor'); ?>
                             
                         </div>
 
                         <div class="mb-3">
-                            <label for="ai_prompt" class="form-label">AI Prompt <div class="form-text">Prompt som skickas till AI:n för att styra svaren. (Be gärna ett AI om hjälp)</div></label>
+                            <label for="ai_prompt" class="form-label fw-normal">AI Prompt<br><span class="form-text fw-normal">Prompt som skickas till AI:n för att styra svaren. (Be gärna ett AI om hjälp)</span></label>
                             
                             <?php require_once 'include/editor.php'; renderEditor($aiPrompt ?? '', 'ai_prompt', 'aiPromptEditor'); ?>
                            
                         </div>
 
                         <div class="mb-3">
-                            <label for="quiz_question" class="form-label">Quiz-fråga</label>
+                            <label for="quiz_question" class="form-label fw-normal">Quiz-fråga</label>
                             <?php require_once 'include/editor.php'; renderEditor($quizQuestion ?? '', 'quiz_question', 'quizQuestionEditor'); ?>
                         </div>
 
@@ -357,6 +358,8 @@ $courses = queryAll("SELECT * FROM " . DB_DATABASE . ".courses ORDER BY sort_ord
 // Inkludera footer
 require_once 'include/footer.php';
 ?>
+
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
