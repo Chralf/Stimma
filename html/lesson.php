@@ -386,6 +386,39 @@ function convertYoutubeUrl($url) {
                     </div>
                 </div>
                 
+                <!-- Progress bar for course completion -->
+                <?php
+                // Get all lessons in this course
+                $allLessons = query("
+                    SELECT id FROM " . DB_DATABASE . ".lessons 
+                    WHERE course_id = ? 
+                    ORDER BY sort_order", 
+                    [$lesson['course_id']]);
+                
+                // Count total lessons in the course
+                $totalLessons = count($allLessons);
+                
+                // Count completed lessons
+                $completedLessons = 0;
+                foreach ($allLessons as $courseLesson) {
+                    $lessonProgress = queryOne("
+                        SELECT status FROM " . DB_DATABASE . ".progress 
+                        WHERE user_id = ? AND lesson_id = ?", 
+                        [$userId, $courseLesson['id']]);
+                    if ($lessonProgress && $lessonProgress['status'] === 'completed') {
+                        $completedLessons++;
+                    }
+                }
+                
+                // Calculate progress percentage
+                $progressPercent = ($totalLessons > 0) ? round(($completedLessons / $totalLessons) * 100) : 0;
+                ?>
+                
+                <div class="progress mt-3 mb-4" style="height: 8px; background-color: white; border: 1px solid #dee2e6;" title="<?= $completedLessons ?> av <?= $totalLessons ?> lektioner avklarade">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: <?= $progressPercent ?>%" 
+                         aria-valuenow="<?= $progressPercent ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                
                 <!-- Extra utrymme under quizrutan -->
                 <div class="py-5"></div>
             </main>
