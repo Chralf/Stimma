@@ -1,4 +1,11 @@
 <?php
+/**
+ * Stimma - Configuration
+ * 
+ * This file contains all configuration settings for the application.
+ * Edit these values to match your environment.
+ */
+
 // Force HTTPS
 if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
     $location = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
@@ -7,111 +14,120 @@ if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
     exit;
 }
 
-// Load environment variables from .env file
-function loadEnv($path = '.env') {
-    // We'll search the directory tree upward for the .env file
-    $currentDir = dirname($_SERVER['SCRIPT_FILENAME']);
-    $rootDir = $_SERVER['DOCUMENT_ROOT'] ?: dirname(dirname(dirname($currentDir))); // Set a limit to stop at website root
-    
-    $envPath = $currentDir . '/' . $path;
-    
-    // Keep going up directories until we find the file or reach the root directory
-    while (!file_exists($envPath) && $currentDir !== $rootDir && $currentDir !== dirname($currentDir)) {
-        $currentDir = dirname($currentDir);
-        $envPath = $currentDir . '/' . $path;
-    }
-    
-    // If we found the .env file, use it; otherwise, throw an exception
-    if (file_exists($envPath)) {
-        $path = $envPath;
-    } else {
-        throw new Exception(".env file not found in any parent directory up to the root");
+// Path Configuration
+define('ROOT_PATH', dirname(__DIR__)); // One level up from this file
+define('ENV_PATH', ROOT_PATH . '/.env');
+define('ADMIN_PATH', ROOT_PATH . '/admin');
+define('FRONTEND_PATH', ROOT_PATH);
+
+// Load environment variables
+function loadEnv($path) {
+    if (!file_exists($path)) {
+        die("Error: .env file not found at: " . $path);
     }
     
     $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
-        // Skip comments
-        if (strpos(trim($line), '#') === 0) {
-            continue;
+        if (strpos($line, '=') !== false && strpos($line, '#') !== 0) {
+            list($key, $value) = explode('=', $line, 2);
+            $key = trim($key);
+            $value = trim($value);
+            
+            // Remove quotes if present
+            if (strpos($value, '"') === 0 || strpos($value, "'") === 0) {
+                $value = substr($value, 1, -1);
+            }
+            
+            putenv("$key=$value");
+            $_ENV[$key] = $value;
+            $_SERVER[$key] = $value;
         }
-        
-        // Parse line
-        list($name, $value) = explode('=', $line, 2);
-        $name = trim($name);
-        $value = trim($value);
-        
-        // Set as environment variable
-        putenv("$name=$value");
-        $_ENV[$name] = $value;
-        $_SERVER[$name] = $value;
     }
 }
 
+// Load environment variables from .env file
+loadEnv(ENV_PATH);
 
-// Load environment variables
-loadEnv('.env');
+// Database Configuration
+define('DB_CONNECTION', getenv('DB_CONNECTION') ?: 'mysql');
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_PORT', getenv('DB_PORT') ?: '3306');
+define('DB_DATABASE', getenv('DB_DATABASE') ?: 'stimma');
+define('DB_USERNAME', getenv('DB_USERNAME') ?: '');
+define('DB_PASSWORD', getenv('DB_PASSWORD') ?: '');
 
-// Database configuration
-define('DB_CONNECTION', getenv('DB_CONNECTION'));
-define('DB_HOST', getenv('DB_HOST'));
-define('DB_PORT', getenv('DB_PORT'));
-define('DB_DATABASE', getenv('DB_DATABASE'));
-define('DB_USERNAME', getenv('DB_USERNAME'));
-define('DB_PASSWORD', trim(getenv('DB_PASSWORD'), '"'));
+// Site Configuration
+define('SITE_NAME', getenv('SITE_NAME') ?: 'Stimma');
+define('SITE_URL', getenv('SITE_URL') ?: 'https://' . $_SERVER['HTTP_HOST']);
+define('ADMIN_EMAIL', getenv('ADMIN_EMAIL') ?: 'admin@example.com');
 
-// Site configuration
-define('SITE_NAME', getenv('SITE_NAME'));
-// Ensure SITE_URL always uses HTTPS
-define('SITE_URL', 'https://' . $_SERVER['HTTP_HOST']); 
-define('ADMIN_EMAIL', getenv('ADMIN_EMAIL'));
+// Mail Configuration
+define('MAIL_HOST', getenv('MAIL_HOST') ?: '');
+define('MAIL_PORT', getenv('MAIL_PORT') ?: '465');
+define('MAIL_USERNAME', getenv('MAIL_USERNAME') ?: '');
+define('MAIL_PASSWORD', getenv('MAIL_PASSWORD') ?: '');
+define('MAIL_ENCRYPTION', getenv('MAIL_ENCRYPTION') ?: 'ssl');
+define('MAIL_FROM_ADDRESS', getenv('MAIL_FROM_ADDRESS') ?: '');
+define('MAIL_FROM_NAME', getenv('MAIL_FROM_NAME') ?: 'Stimma');
+define('MAIL_ALLOWED_RECIPIENTS', getenv('MAIL_ALLOWED_RECIPIENTS') ?: '');
+
+// AI Configuration
+define('AI_SERVER', getenv('AI_SERVER') ?: '');
+define('AI_API_KEY', getenv('AI_API_KEY') ?: '');
+define('AI_MODEL', getenv('AI_MODEL') ?: '');
+define('AI_MAX_COMPLETION_TOKENS', getenv('AI_MAX_COMPLETION_TOKENS') ?: 4096);
+define('AI_TEMPERATURE', getenv('AI_TEMPERATURE') ?: 0.7);
+define('AI_TOP_P', getenv('AI_TOP_P') ?: 0.9);
+define('AI_STREAM', getenv('AI_STREAM') ?: false);
+define('AI_MAX_MESSAGE_LENGTH', getenv('AI_MAX_MESSAGE_LENGTH') ?: 1000);
+define('AI_RATE_LIMIT_REQUESTS', getenv('AI_RATE_LIMIT_REQUESTS') ?: 50);
+define('AI_RATE_LIMIT_MINUTES', getenv('AI_RATE_LIMIT_MINUTES') ?: 5);
+
+// Auth Configuration
+define('AUTH_TOKEN_EXPIRY_MINUTES', getenv('AUTH_TOKEN_EXPIRY_MINUTES') ?: 15);
+define('SESSION_REGENERATE_MINUTES', getenv('SESSION_REGENERATE_MINUTES') ?: 30);
+define('SESSION_LIFETIME', getenv('SESSION_LIFETIME') ?: 30);
+define('SESSION_LIFETIME_HOURS', getenv('SESSION_LIFETIME_HOURS') ?: 24);
 
 // Session settings
-// Kontrollera om sessionen redan är startad
 if (session_status() === PHP_SESSION_NONE) {
-    // Sätt cookie-parametrar innan session startas
-    $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'; // Använd HTTPS om tillgängligt
-    $httponly = true; // Förhindra JS-åtkomst till sessionscookien
+    // Set cookie parameters before starting session
+    $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+    $httponly = true;
 
-    // Hämta session livstid från .env eller använd standardvärde (30 dagar)
-    $sessionLifetime = getenv('SESSION_LIFETIME') ? (int)getenv('SESSION_LIFETIME') : 30;
-    $sessionLifetimeSeconds = $sessionLifetime * 24 * 60 * 60;
-    
-    // Använd endast cookies för sessionshantering (ingen lagring på servern)
+    // Use only cookies for session handling
     ini_set('session.use_cookies', 1);
     ini_set('session.use_only_cookies', 1);
     ini_set('session.use_trans_sid', 0);
     
-    // Sätt cookie-livstid från .env
-    ini_set('session.cookie_lifetime', $sessionLifetimeSeconds);
-    
-    // Sätt session cookie-parametrar
+    // Set session cookie parameters
     session_set_cookie_params([
-        'lifetime' => $sessionLifetimeSeconds,
-        'path' => getenv('SESSION_PATH') ?: '/',
-        'domain' => getenv('SESSION_DOMAIN') ?: '',
+        'lifetime' => SESSION_LIFETIME * 24 * 60 * 60,
+        'path' => '/',
+        'domain' => '',
         'secure' => $secure,
-        'httponly' => getenv('SESSION_HTTPONLY') ? (bool)getenv('SESSION_HTTPONLY') : true,
-        'samesite' => getenv('SESSION_SAMESITE') ?: 'Lax'
+        'httponly' => $httponly,
+        'samesite' => 'Lax'
     ]);
     
-    // Starta sessionen
+    // Start session
     session_start();
     
-    // Förnya sessionen om den är äldre än en dag för att förlänga livstiden
+    // Renew session if older than a day
     if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 86400)) {
-        // Spara undan viktig sessionsdata
+        // Save important session data
         $userId = $_SESSION['user_id'] ?? null;
         $userEmail = $_SESSION['user_email'] ?? null;
         
-        // Regenerera sessions-ID för säkerhet
+        // Regenerate session ID for security
         session_regenerate_id(true);
         
-        // Återställ viktig sessionsdata
+        // Restore important session data
         if ($userId) $_SESSION['user_id'] = $userId;
         if ($userEmail) $_SESSION['user_email'] = $userEmail;
     }
     
-    // Uppdatera senaste aktivitetstidpunkt
+    // Update last activity timestamp
     $_SESSION['last_activity'] = time();
 }
 
@@ -132,8 +148,8 @@ function isDomainAllowed($domain) {
         return in_array($domain, $allowedDomainsCache);
     }
     
-    // Get allowed domains from environment variable
-    $allowedDomainsStr = getenv('MAIL_ALLOWED_RECIPIENTS');
+    // Get allowed domains from configuration
+    $allowedDomainsStr = MAIL_ALLOWED_RECIPIENTS;
     if (empty($allowedDomainsStr)) {
         $allowedDomainsCache = [];
         return false;
