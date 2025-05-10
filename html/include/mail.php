@@ -26,7 +26,7 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
     $debug[] = "Ansluter till $host:$port med $encryption...";
     
     // Anslut till SMTP-server
-    if ($encryption == 'ssl') {
+    if ($encryption == 'ssl' && $port != 25) {
         $socket = fsockopen("ssl://$host", $port, $errno, $errstr, 30);
     } else {
         $socket = fsockopen($host, $port, $errno, $errstr, 30);
