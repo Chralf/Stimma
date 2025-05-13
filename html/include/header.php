@@ -78,12 +78,9 @@
                     
                     if (isset($_SESSION['user_id'])) {
                         // Check admin status
-                        $user = queryOne("SELECT is_admin FROM " . DB_DATABASE . ".users WHERE id = ?", [$_SESSION['user_id']]);
+                        $user = queryOne("SELECT is_admin, is_editor FROM " . DB_DATABASE . ".users WHERE id = ?", [$_SESSION['user_id']]);
                         $isAdmin = $user ? (bool)$user['is_admin'] : false;
-                        
-                        // Check if user is a course editor
-                        $editor = queryOne("SELECT 1 FROM " . DB_DATABASE . ".course_editors WHERE email = ?", [$_SESSION['user_email']]);
-                        $isCourseEditor = $editor ? true : false;
+                        $isCourseEditor = $user ? (bool)$user['is_editor'] : false;
                     }
                     
                     if ($isAdmin || $isCourseEditor): ?>
