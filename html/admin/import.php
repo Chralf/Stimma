@@ -59,8 +59,8 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'
             // Börja transaktion
             execute("START TRANSACTION");
             
-            // Hämta användarens ID
-            $user = queryOne("SELECT id FROM " . DB_DATABASE . ".users WHERE email = ?", [$_SESSION['user_email']]);
+            // Hämta användarens ID, is_admin och is_editor
+            $user = queryOne("SELECT id, is_admin, is_editor FROM " . DB_DATABASE . ".users WHERE email = ?", [$_SESSION['user_email']]);
             if (!$user) {
                 throw new Exception('Kunde inte hitta användarinformation.');
             }
@@ -85,6 +85,11 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'
                 $data['course']['featured'] ?? 0,
                 $user['id'] // Använd den inloggade användarens ID som author_id
             ]);
+
+            // Om användaren inte är admin, lägg till i course_editors
+            if (isset($user['is_admin']) && intval($user['is_admin']) !== 1) {
+                execute("INSERT INTO " . DB_DATABASE . ".course_editors (course_id, email, created_by) VALUES (?, ?, ?)", [$courseId, $_SESSION['user_email'], $user['id']]);
+            }
 
             // Förbered statusinformation
             $status = [
