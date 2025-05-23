@@ -31,8 +31,8 @@ function loadEnv($path) {
         if (strpos($line, '=') !== false && strpos($line, '#') !== 0) {
             list($key, $value) = explode('=', $line, 2);
             $key = trim($key);
-            $value = trim($value);
-            
+        $value = trim($value);
+        
             // Remove quotes if present
             if (strpos($value, '"') === 0 || strpos($value, "'") === 0) {
                 $value = substr($value, 1, -1);
@@ -41,8 +41,8 @@ function loadEnv($path) {
             putenv("$key=$value");
             $_ENV[$key] = $value;
             $_SERVER[$key] = $value;
-        }
     }
+}
 }
 
 // Load environment variables from .env file

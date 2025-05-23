@@ -334,7 +334,7 @@ function cleanHtml($html) {
     }
 
     // Ta bort escaped quotes
-    $html = str_replace('\"', '"', $html);
+    $html = str_replace('"', '"', $html);
     
     // Konvertera HTML-entiteter till deras motsvarande tecken
     $html = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -350,7 +350,8 @@ function cleanHtml($html) {
         'ul',      // Punktlista
         'ol',      // Numrerad lista
         'li',      // Listobjekt
-        'p'        // Stycke
+        'p',       // Stycke
+        'div'      // Div (kommer att konverteras till p)
     ];
     
     // Ta bort alla HTML-taggar förutom de tillåtna
@@ -359,8 +360,8 @@ function cleanHtml($html) {
     // Ta bort alla attribut från de kvarvarande taggarna
     $html = preg_replace('/<([\w]+)[^>]*>/i', '<$1>', $html);
     
-    // Ta bort tomma attribut
-    $html = preg_replace('/<([\w]+)\s+>/i', '<$1>', $html);
+    // Konvertera div-taggar till p-taggar
+    $html = str_replace(['<div>', '</div>'], ['<p>', '</p>'], $html);
     
     // Ta bort kapslade p-taggar
     $html = preg_replace('/<p>\s*<p>/i', '<p>', $html);
@@ -370,26 +371,20 @@ function cleanHtml($html) {
     $html = preg_replace('/<p>\s*<li>/i', '<li>', $html);
     $html = preg_replace('/<\/li>\s*<\/p>/i', '</li>', $html);
     
-    // Konvertera dubbla radbrytningar till </p><p>
-    $html = '<p>' . preg_replace('/\n\n+/', '</p><p>', $html) . '</p>';
-    
-    // Konvertera enstaka radbrytningar till <br>
-    $html = str_replace("\n", '<br>', $html);
-    
-    // Ta bort tomma stycken
-    $html = preg_replace('/<p>\s*<\/p>/', '', $html);
+    // Ta bort tomma stycken och stycken som bara innehåller <br> eller whitespace
+    $html = preg_replace('/<p>(\s|<br>)*<\/p>/i', '', $html);
     
     // Ta bort tomma listobjekt
     $html = preg_replace('/<li>\s*<\/li>/', '', $html);
     
-    // Säkerställ att alla taggar är korrekt stängda
-    $html = force_balance_tags($html);
+    // Trimma whitespace mellan taggar
+    $html = preg_replace('/>\s+</', '><', $html);
     
     // Ta bort extra mellanslag
     $html = preg_replace('/\s+/', ' ', $html);
     
-    // Ta bort mellanslag mellan taggar
-    $html = preg_replace('/>\s+</', '><', $html);
+    // Säkerställ att alla taggar är korrekt stängda
+    $html = force_balance_tags($html);
     
     return trim($html);
 }
