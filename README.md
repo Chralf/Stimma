@@ -11,6 +11,7 @@ Stimma är ett open source-verktyg för nanolearning med AI-stöd. Plattformen h
 - **Snabb och effektiv inlärning** - Fokusera på de viktigaste delarna av innehållet
 - **Personlig AI-mentor** - Interaktiv dialog anpassad efter dina behov och kunskapsnivå
 - **Anpassade kunskapstest** - Quiz skapade för att förstärka din inlärning
+- **Omfattande mailloggning** - Spårar alla utgående e-postmeddelanden för felsökning och övervakning
 - **GDPR-säker datahantering** - Endast e-post och kursframsteg sparas
 - **100% Open Source** - Fritt att anpassa och förbättra
 
@@ -23,6 +24,13 @@ Stimma är ett open source-verktyg för nanolearning med AI-stöd. Plattformen h
 ## 🛠️ Installation
 
 För installation och konfiguration, se vår [installationsguide](docs/setup.md).
+
+## 📚 Dokumentation
+
+- [Installationsguide](docs/setup.md) - Komplett installationsguide för LAMP-stack
+- [Databasinstallation](docs/setup_database.md) - Databasschema och installation
+- [Färgschema](docs/stimma-color-scheme.md) - Designsystem och färgpalett
+- [Mailloggning](docs/mail-logging.md) - Omfattande mailloggning och felsökning
 
 ## 🤝 Bidra
 
