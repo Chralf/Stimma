@@ -156,6 +156,17 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null, $
     $from = $from ?: $mailFrom;
     $fromName = $fromName ?: $mailFromName;
     
+    // Logga e-postförsök
+    $logMessage = "Cron e-post skickas till: $to | Ämne: $subject | Från: $fromName <$from>";
+    logActivity($to, $logMessage, [
+        'action' => 'cron_mail_send_attempt',
+        'to_email' => $to,
+        'from_email' => $from,
+        'from_name' => $fromName,
+        'subject' => $subject,
+        'message_length' => strlen($message)
+    ]);
+    
     // Connect to SMTP server
     if ($smtpEncryption == 'ssl') {
         $socket = fsockopen("ssl://$smtpHost", $smtpPort, $errno, $errstr, 30);
@@ -164,6 +175,13 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null, $
     }
     
     if (!$socket) {
+        // Logga misslyckad anslutning
+        logActivity($to, "Cron e-post misslyckades: Kunde inte ansluta till SMTP-server ($smtpHost:$smtpPort)", [
+            'action' => 'cron_mail_send_failed',
+            'error' => 'connection_failed',
+            'to_email' => $to,
+            'subject' => $subject
+        ]);
         return false;
     }
     
@@ -256,6 +274,14 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null, $
     
     if (substr($response, 0, 3) != '250') {
         fclose($socket);
+        // Logga misslyckad e-postleverans
+        logActivity($to, "Cron e-post misslyckades: Leverans misslyckades - $response", [
+            'action' => 'cron_mail_send_failed',
+            'error' => 'delivery_failed',
+            'to_email' => $to,
+            'subject' => $subject,
+            'server_response' => $response
+        ]);
         return false;
     }
     
@@ -265,6 +291,16 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null, $
     
     // Close connection
     fclose($socket);
+    
+    // Logga lyckad e-postleverans
+    logActivity($to, "Cron e-post skickat framgångsrikt till: $to | Ämne: $subject", [
+        'action' => 'cron_mail_send_success',
+        'to_email' => $to,
+        'from_email' => $from,
+        'from_name' => $fromName,
+        'subject' => $subject,
+        'message_length' => strlen($message)
+    ]);
     
     return true;
 }
@@ -343,8 +379,22 @@ foreach ($users as $user) {
     
     if (sendSmtpMail($to, $subject, $message, null, null, $siteUrl)) {
         echo "Reminder sent to {$user['email']}\n";
+        // Logga framgångsrik påminnelse
+        logActivity($user['email'], "Påminnelse skickat framgångsrikt", [
+            'action' => 'reminder_sent',
+            'email' => $user['email'],
+            'lesson_id' => $lesson['id'],
+            'course_id' => $lesson['course_id']
+        ]);
     } else {
         echo "Failed to send reminder to {$user['email']}\n";
+        // Logga misslyckad påminnelse
+        logActivity($user['email'], "Påminnelse misslyckades att skickas", [
+            'action' => 'reminder_failed',
+            'email' => $user['email'],
+            'lesson_id' => $lesson['id'],
+            'course_id' => $lesson['course_id']
+        ]);
     }
 }
 

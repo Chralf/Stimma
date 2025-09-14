@@ -87,7 +87,20 @@ function sendLoginToken($email) {
     // Använd sendSmtpMail från mail.php
     $mailSent = sendSmtpMail($email, $subject, $htmlMessage, $mailFrom, $mailFromName);
     
-   
+    // Logga specifikt för inloggningstoken
+    if ($mailSent) {
+        logActivity($email, "Inloggningstoken skickat framgångsrikt", [
+            'action' => 'login_token_sent',
+            'token_expiry_minutes' => $tokenExpiryMinutes,
+            'email' => $email
+        ]);
+    } else {
+        logActivity($email, "Inloggningstoken misslyckades att skickas", [
+            'action' => 'login_token_failed',
+            'email' => $email
+        ]);
+    }
+    
     return $mailSent;
 }
 

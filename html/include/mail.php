@@ -21,6 +21,17 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
     $from = $from ?: (getenv('MAIL_FROM_ADDRESS') ?: 'noreply@tropheus.se');
     $fromName = $fromName ?: (getenv('MAIL_FROM_NAME') ?: 'Stimma');
     
+    // Logga e-postförsök
+    $logMessage = "E-post skickas till: $to | Ämne: $subject | Från: $fromName <$from>";
+    logActivity($to, $logMessage, [
+        'action' => 'mail_send_attempt',
+        'to_email' => $to,
+        'from_email' => $from,
+        'from_name' => $fromName,
+        'subject' => $subject,
+        'message_length' => strlen($message)
+    ]);
+    
     // För felsökning
     $debug = [];
     $debug[] = "Ansluter till $host:$port med $encryption...";
@@ -33,6 +44,13 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
     }
     
     if (!$socket) {
+        // Logga misslyckad anslutning
+        logActivity($to, "E-post misslyckades: Kunde inte ansluta till SMTP-server ($host:$port)", [
+            'action' => 'mail_send_failed',
+            'error' => 'connection_failed',
+            'to_email' => $to,
+            'subject' => $subject
+        ]);
         return false;
     }
     
@@ -42,6 +60,14 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
     
     if (substr($response, 0, 3) != '220') {
         fclose($socket);
+        // Logga misslyckad serverhälsning
+        logActivity($to, "E-post misslyckades: Ogiltig serverhälsning - $response", [
+            'action' => 'mail_send_failed',
+            'error' => 'invalid_server_response',
+            'to_email' => $to,
+            'subject' => $subject,
+            'server_response' => $response
+        ]);
         return false;
     }
     
@@ -87,6 +113,14 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
         
         if (substr($response, 0, 3) != '235') {
             fclose($socket);
+            // Logga misslyckad autentisering
+            logActivity($to, "E-post misslyckades: Autentisering misslyckades - $response", [
+                'action' => 'mail_send_failed',
+                'error' => 'authentication_failed',
+                'to_email' => $to,
+                'subject' => $subject,
+                'server_response' => $response
+            ]);
             return false;
         }
     }
@@ -98,6 +132,14 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
     
     if (substr($response, 0, 3) != '250') {
         fclose($socket);
+        // Logga misslyckad FROM-kommando
+        logActivity($to, "E-post misslyckades: FROM-kommando misslyckades - $response", [
+            'action' => 'mail_send_failed',
+            'error' => 'from_command_failed',
+            'to_email' => $to,
+            'subject' => $subject,
+            'server_response' => $response
+        ]);
         return false;
     }
     
@@ -108,6 +150,14 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
     
     if (substr($response, 0, 3) != '250') {
         fclose($socket);
+        // Logga misslyckad TO-kommando
+        logActivity($to, "E-post misslyckades: TO-kommando misslyckades - $response", [
+            'action' => 'mail_send_failed',
+            'error' => 'to_command_failed',
+            'to_email' => $to,
+            'subject' => $subject,
+            'server_response' => $response
+        ]);
         return false;
     }
     
@@ -118,6 +168,14 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
     
     if (substr($response, 0, 3) != '354') {
         fclose($socket);
+        // Logga misslyckad DATA-kommando
+        logActivity($to, "E-post misslyckades: DATA-kommando misslyckades - $response", [
+            'action' => 'mail_send_failed',
+            'error' => 'data_command_failed',
+            'to_email' => $to,
+            'subject' => $subject,
+            'server_response' => $response
+        ]);
         return false;
     }
     
@@ -137,6 +195,14 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
     
     if (substr($response, 0, 3) != '250') {
         fclose($socket);
+        // Logga misslyckad e-postleverans
+        logActivity($to, "E-post misslyckades: Leverans misslyckades - $response", [
+            'action' => 'mail_send_failed',
+            'error' => 'delivery_failed',
+            'to_email' => $to,
+            'subject' => $subject,
+            'server_response' => $response
+        ]);
         return false;
     }
     
@@ -148,6 +214,15 @@ function sendSmtpMail($to, $subject, $message, $from = null, $fromName = null) {
     // Stäng anslutningen
     fclose($socket);
     
+    // Logga lyckad e-postleverans
+    logActivity($to, "E-post skickat framgångsrikt till: $to | Ämne: $subject", [
+        'action' => 'mail_send_success',
+        'to_email' => $to,
+        'from_email' => $from,
+        'from_name' => $fromName,
+        'subject' => $subject,
+        'message_length' => strlen($message)
+    ]);
 
     return true;
 }

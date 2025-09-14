@@ -40,7 +40,7 @@ $totalLogs = queryOne("SELECT COUNT(*) as count FROM " . DB_DATABASE . ".logs")[
 $totalPages = ceil($totalLogs / $perPage);
 
 // Hämta loggar från databasen
-$logs = queryAll("SELECT * FROM " . DB_DATABASE . ".logs ORDER BY created_at DESC");
+$logs = queryAll("SELECT * FROM " . DB_DATABASE . ".logs ORDER BY created_at DESC LIMIT $perPage OFFSET $offset");
 
 // Inkludera header
 require_once 'include/header.php';
@@ -60,15 +60,55 @@ require_once 'include/header.php';
                                 <tr>
                                     <th>Datum</th>
                                     <th>E-post</th>
-                                    <th>Aktivitet</th>
+                                    <th>Typ</th>
+                                    <th>Meddelande</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($logs as $log): ?>
+                                <?php foreach ($logs as $log): 
+                                    // Extrahera typ och status från meddelandet
+                                    $type = 'Övrigt';
+                                    $status = '';
+                                    
+                                    if (strpos($log['message'], 'E-post skickas till') !== false) {
+                                        $type = 'E-post';
+                                        $status = '<span class="badge bg-warning">Skickas</span>';
+                                    } elseif (strpos($log['message'], 'E-post skickat framgångsrikt') !== false) {
+                                        $type = 'E-post';
+                                        $status = '<span class="badge bg-success">Skickat</span>';
+                                    } elseif (strpos($log['message'], 'E-post misslyckades') !== false) {
+                                        $type = 'E-post';
+                                        $status = '<span class="badge bg-danger">Misslyckades</span>';
+                                    } elseif (strpos($log['message'], 'Inloggningstoken') !== false) {
+                                        $type = 'Inloggning';
+                                        if (strpos($log['message'], 'framgångsrikt') !== false) {
+                                            $status = '<span class="badge bg-success">Skickat</span>';
+                                        } else {
+                                            $status = '<span class="badge bg-danger">Misslyckades</span>';
+                                        }
+                                    } elseif (strpos($log['message'], 'AI-anrop') !== false) {
+                                        $type = 'AI';
+                                        if (strpos($log['message'], 'lyckades') !== false) {
+                                            $status = '<span class="badge bg-success">Lyckades</span>';
+                                        } else {
+                                            $status = '<span class="badge bg-danger">Misslyckades</span>';
+                                        }
+                                    } elseif (strpos($log['message'], 'Påminnelse') !== false) {
+                                        $type = 'Påminnelse';
+                                        if (strpos($log['message'], 'framgångsrikt') !== false) {
+                                            $status = '<span class="badge bg-success">Skickat</span>';
+                                        } else {
+                                            $status = '<span class="badge bg-danger">Misslyckades</span>';
+                                        }
+                                    }
+                                ?>
                                 <tr>
-                                    <td><?php echo date('Y-m-d H:i:s', strtotime($log['created_at'])); ?></td>
-                                    <td><?php echo htmlspecialchars($log['email']); ?></td>
-                                    <td><?php echo htmlspecialchars($log['message']); ?></td>
+                                    <td><?= date('Y-m-d H:i:s', strtotime($log['created_at'])) ?></td>
+                                    <td><?= htmlspecialchars($log['email']) ?></td>
+                                    <td><span class="badge bg-secondary"><?= $type ?></span></td>
+                                    <td><?= htmlspecialchars($log['message']) ?></td>
+                                    <td><?= $status ?></td>
                                 </tr>
                                 <?php endforeach; ?>
                             </tbody>
