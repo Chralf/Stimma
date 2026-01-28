@@ -1,6 +1,9 @@
 # Stimma
 
-Rekommenderar denna fork med betydligt fler funktionern: https://github.com/Sambruk/stimma
+# ⚠️ Detta repo är inaktivt
+
+Projektet har flyttats till och vidareutvecklas av Sambruk:
+https://github.com/Sambruk/stimma
 
 [![License: GPL v2](https://img.shields.io/badge/License-GPL_v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 
