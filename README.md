@@ -1,5 +1,7 @@
 # Stimma
 
+Rekommenderar denna fork med betydligt fler funktionern: https://github.com/Sambruk/stimma
+
 [![License: GPL v2](https://img.shields.io/badge/License-GPL_v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 
 Stimma är ett open source-verktyg för nanolearning med AI-stöd. Plattformen hjälper användare att snabbt lära sig nya ämnen genom en kombination av koncist innehåll, AI-stödd dialog och personliga kunskapstest.
